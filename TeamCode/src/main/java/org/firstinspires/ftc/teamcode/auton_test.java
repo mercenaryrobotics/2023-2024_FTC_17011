@@ -82,6 +82,17 @@ public class auton_test extends LinearOpMode {
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
     }
+    public void autoStuff(int a){
+        if (a == 1){
+
+        }
+        else if (a == 2){
+
+        }
+        else {
+
+        }
+    }
 
     public void encoderDrive(double speed, double leftInches, double rightInches) {
         int newLeftTarget;
