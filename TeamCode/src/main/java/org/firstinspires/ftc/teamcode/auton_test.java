@@ -66,6 +66,7 @@ public class auton_test extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
+    private FtcDashboard dashboard;
     OpenCvWebcam webcam;
 
 
@@ -106,6 +107,11 @@ public class auton_test extends LinearOpMode {
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+    }
+
+    private void initializeDashboard() {
+        dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
     }
 
     private void initializeVision() {
@@ -244,6 +250,8 @@ public class auton_test extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         initializeMotors();
+        initializeDashboard();
+        initializeVision();
         waitForStart();
 
         encoderDrive(DRIVE_SPEED, 10, 10);
