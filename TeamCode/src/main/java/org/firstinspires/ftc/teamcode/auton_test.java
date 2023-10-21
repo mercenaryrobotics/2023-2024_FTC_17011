@@ -58,8 +58,6 @@ public class auton_test extends LinearOpMode {
 
     private DcMotorEx climberMoter = null;
 
-    private DcMotorEx wrist = null;
-
     private Servo intake = null;
 
     private DcMotorEx arm = null;
@@ -77,7 +75,6 @@ public class auton_test extends LinearOpMode {
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
         //climberMoter = hardwareMap.get(DcMotorEx.class, "climber");
         arm = hardwareMap.get(DcMotorEx.class, "Arm");
-        wrist = hardwareMap.get(DcMotorEx.class, "wrist");
         intake = hardwareMap.get(Servo.class, "intake");
 
 
