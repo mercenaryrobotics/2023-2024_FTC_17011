@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-@Autonomous (name="auton_test", group="Robot")
+@Autonomous (name="RedAuton", group="Robot")
 public class auton_test extends LinearOpMode {
     public static double ORBITAL_FREQUENCY = 0.05;
     public static double SPIN_FREQUENCY = 0.25;
@@ -58,6 +58,7 @@ public class auton_test extends LinearOpMode {
 
     private DcMotorEx climberMoter = null;
 
+
     private Servo intake = null;
 
     private DcMotorEx arm = null;
@@ -65,9 +66,36 @@ public class auton_test extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     private FtcDashboard dashboard;
+
+
+
+    int BackRightPos;
+    int BackLeftPos;
+    int FrontLeftPos;
+    int FrontRightPos;
     OpenCvWebcam webcam;
 
-
+    private void drive(int FrontLeftTarget, int FrontRightTarget, int BackLeftTarget, int BackRightTarget, double speed) {
+        BackRightPos += BackRightTarget;
+        BackLeftPos -= BackLeftTarget;
+        FrontLeftPos -= FrontLeftTarget;
+        FrontRightPos += FrontRightTarget;
+        backLeftDrive.setTargetPosition(BackLeftPos);
+        backRightDrive.setTargetPosition(BackRightPos);
+        frontLeftDrive.setTargetPosition(FrontLeftPos);
+        frontRightDrive.setTargetPosition(FrontRightPos);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightDrive.setPower(speed);
+        frontLeftDrive.setPower(speed);
+        backRightDrive.setPower(speed);
+        backLeftDrive.setPower(speed);
+        while (opModeIsActive() && frontRightDrive.isBusy() && frontLeftDrive.isBusy() && backRightDrive.isBusy() && backLeftDrive.isBusy()) {
+            idle();
+        }
+    }
     private void initializeMotors() {
         frontLeftDrive = hardwareMap.get(DcMotorEx.class, "FL");
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
@@ -101,8 +129,11 @@ public class auton_test extends LinearOpMode {
 
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setPower(0.2);
+        arm.setTargetPositionTolerance(1);
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
 
     }
 
@@ -190,6 +221,8 @@ public class auton_test extends LinearOpMode {
     }
 
     public void encoderDrive(double speed, double leftInches, double rightInches) {
+        leftInches = leftInches * -1;
+
         int newLeftTarget;
         int newRightTarget;
 
@@ -250,8 +283,37 @@ public class auton_test extends LinearOpMode {
         initializeDashboard();
         initializeVision();
         waitForStart();
+        intake.scaleRange(0, 1);
+        intake.setDirection(Servo.Direction.FORWARD);
 
-        encoderDrive(DRIVE_SPEED, 10, 10);
-        sleep(1000);
+
+        if (opModeIsActive()) {
+            intake.setPosition(0.7);
+            sleep(300);
+            arm.setTargetPosition(-50);
+            sleep(100);
+            drive(-1300, 1300, 1300, -1300, 0.5);
+            sleep(300);
+            intake.setPosition(0.7);
+            sleep(100);
+            drive(900, 900, 900, 900, 0.5);
+            sleep(300);
+            intake.setPosition(0.7);
+            arm.setTargetPosition(-190);
+            sleep(300);
+            drive(670, 670, 670, 670, 0.2);
+            sleep(500);
+            intake.setPosition(0.5);
+            sleep(500);
+            drive(-800, -800, -800, -800, 0.2);
+            arm.setTargetPosition(0);
+            sleep(500);
+            drive(1200, -1200, -1200, 1200, 0.6);
+            sleep(500);
+            drive(1000, 1000, 1000, 1000, 0.6);
+            sleep(100000);
+        }
     }
+
+
 }

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-@TeleOp (name = "arm work" ,group = "Linear Opmode")
+@TeleOp (name = "Main2024CompCode" ,group = "Linear Opmode")
 
 //@Disabled
 public class hello extends LinearOpMode {
@@ -19,7 +19,7 @@ public class hello extends LinearOpMode {
     public static double SPIN_FREQUENCY = 0.25;
     public static double ORBITAL_RADIUS = 50;
     public static double SIDE_LENGTH = 10;
-    public static double SPEED_MULTIPLIER = 0.85;
+    public static double SPEED_MULTIPLIER = 0.95;
 
     public static double INTAKE_OPEN_POS = 0.5;
     public static double INTAKE_CLOSE_POS = 0.7;
@@ -129,9 +129,9 @@ public class hello extends LinearOpMode {
         double backRightPower = -(y + x - rx) / denominator;
 
         frontLeftDrive.setPower(frontLeftPower * SPEED_MULTIPLIER);
-        backLeftDrive.setPower(backLeftPower * 0.85);
-        frontRightDrive.setPower(frontRightPower * 0.85);
-        backRightDrive.setPower(backRightPower * 0.85);
+        backLeftDrive.setPower(backLeftPower * SPEED_MULTIPLIER);
+        frontRightDrive.setPower(frontRightPower * SPEED_MULTIPLIER);
+        backRightDrive.setPower(backRightPower * SPEED_MULTIPLIER;
 
 
     }
@@ -165,10 +165,10 @@ public class hello extends LinearOpMode {
         if (gamepad2.a) {
             arm.setTargetPosition(ARM_DRIVE);
         } else if (gamepad2.right_trigger > 0.3){
-            arm.setTargetPosition(encoderCount + 40);
+            arm.setTargetPosition(encoderCount + Math.round(40 * gamepad2.right_trigger));
         }
         else if (gamepad2.left_trigger > 0.3) {
-            arm.setTargetPosition(encoderCount - 40);
+            arm.setTargetPosition(encoderCount - Math.round(40 * gamepad2.left_trigger));
         }/*else if (gamepad2.b) {
             arm.setTargetPosition(ARM_FRONTSCORE);
         }
