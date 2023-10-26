@@ -131,7 +131,7 @@ public class hello extends LinearOpMode {
         frontLeftDrive.setPower(frontLeftPower * SPEED_MULTIPLIER);
         backLeftDrive.setPower(backLeftPower * SPEED_MULTIPLIER);
         frontRightDrive.setPower(frontRightPower * SPEED_MULTIPLIER);
-        backRightDrive.setPower(backRightPower * SPEED_MULTIPLIER;
+        backRightDrive.setPower(backRightPower * SPEED_MULTIPLIER);
 
 
     }
