@@ -8,12 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.configuration.annotations.ServoType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @TeleOp (name = "Main2024CompCode" ,group = "Linear Opmode")
 
@@ -41,6 +38,7 @@ public class hello extends LinearOpMode {
 
     private DcMotorEx climberLeft = null;
 
+    private DcMotorEx slide = null;
     private Servo climberLeftArm = null;
 
     private Servo shooter = null;
@@ -59,12 +57,14 @@ public class hello extends LinearOpMode {
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
 
         pivot = hardwareMap.get(DcMotorEx.class, "pivot");
+        slide = hardwareMap.get(DcMotorEx.class, "slide");
+
         intake = hardwareMap.get(CRServo.class, "intake");
         //shooter = hardwareMap.get(Servo.class, "shooter");
 
         climberLeft = hardwareMap.get(DcMotorEx.class, "climberleft");
 
-        climberLeftArm = hardwareMap.get(Servo.class, "climberleftarm");
+        climberLeftArm = hardwareMap.get(Servo.class, "climberarmleft");
 
         axe = hardwareMap.get(Servo.class, "axe");
         wrist = hardwareMap.get(Servo.class, "wrist");
@@ -82,6 +82,7 @@ public class hello extends LinearOpMode {
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         climberLeft.setTargetPosition(0);
         climberLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -91,7 +92,11 @@ public class hello extends LinearOpMode {
         pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         pivot.setPower(0.25);
 
-        wrist.setPosition(0);
+        slide.setTargetPosition(0);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        slide.setPower(0.25);
+
+        wrist.setPosition(1);
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
         RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
@@ -165,6 +170,24 @@ public class hello extends LinearOpMode {
             intake.setPower(0);
         }
 
+        if (gamepad2.a) {
+            slide.setTargetPosition(22);
+            if (slide.getCurrentPosition() >= 18 && slide.getCurrentPosition() <= 28){
+                wrist.setPosition(0.6);
+            }
+        }
+        else if (gamepad2.b){
+            wrist.setPosition(0);
+        }
+        else if (gamepad2.x){
+
+            wrist.setPosition(1);
+            if (wrist.getPosition() == 1){
+                slide.setTargetPosition(0);
+            }
+
+        }
+
         if (gamepad1.x) {
             axe.setPosition(0);
         }
@@ -226,7 +249,7 @@ public class hello extends LinearOpMode {
 
     public void runOpMode() {
         initializeMotors();
-        //intake.scaleRange(0,1);
+
         //intake.setDirection(Servo.Direction.FORWARD);
         //intake.setPosition(0.5);
 
@@ -240,7 +263,9 @@ public class hello extends LinearOpMode {
         while (opModeIsActive()) {
 
 //            telemetry.addData("climber pos", climberMotor.getCurrentPosition());
-            telemetry.addLine("test");
+            telemetry.addData("wrist pos", wrist.getPosition());
+            telemetry.addData("pivot pos", pivot.getCurrentPosition());
+            telemetry.addData("slide pos", slide.getCurrentPosition());
             updateTelemetry(telemetry);
 
             //joystickTankDrive();
