@@ -215,6 +215,16 @@ public class hello extends LinearOpMode {
             arm.setTargetPosition(ARM_SCORE);
         }*/
 
+        //TODO: Remove test
+        if (gamepad2.left_bumper) {
+            wrist.setPosition(1 - gamepad2.left_trigger);
+        } else if (gamepad2.dpad_up) {
+            slide.setTargetPosition(slide.getCurrentPosition() + 60);
+        } else if (gamepad2.dpad_down) {
+            slide.setTargetPosition(slide.getCurrentPosition() - 60);
+            slide.setTargetPosition(0);
+        }
+
     }
 
     private void fieldCentricDrive() {
