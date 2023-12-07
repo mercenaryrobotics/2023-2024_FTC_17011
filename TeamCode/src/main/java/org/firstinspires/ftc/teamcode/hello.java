@@ -21,12 +21,19 @@ public class hello extends LinearOpMode {
     public static double SPIN_FREQUENCY = 0.25;
     public static double ORBITAL_RADIUS = 50;
     public static double SIDE_LENGTH = 10;
-    public static double SPEED_MULTIPLIER = 1.00;
+    public static double SPEED_MULTIPLIER = 0.95;
 
+    public static double INTAKE_OPEN_POS = 0.4;
+    public static double INTAKE_CLOSE_POS = 0.6;
 
-    public static int ARM_DRIVE = 0;
+    public static int
+            ARM_DRIVE = 0;
 
     private IMU imu = null;      // Control/Expansion Hub IMU
+
+    public static int ARM_SCORE = -650;
+    public static int ARM_FRONTSCORE = -145;
+    public static double ARM_POWER = 0.2;
 
     //Motor demo variables
     private DcMotorEx frontLeftDrive = null;
@@ -34,41 +41,35 @@ public class hello extends LinearOpMode {
     private DcMotorEx backLeftDrive = null;
     private DcMotorEx backRightDrive = null;
 
-    //private DcMotorEx climberMotor = null;
-
-    private DcMotorEx climberLeft = null;
-
-    private DcMotorEx slide = null;
-    private Servo climberLeftArm = null;
+    private DcMotorEx climberMotorLeft = null;
+    private DcMotorEx climberMotorRight = null;
 
     private Servo shooter = null;
 
-    private CRServo intake = null;
+    private CRServo intakeLeft = null;
+    private CRServo intakeRight = null;
 
-    private Servo axe = null;
+    private DcMotorEx arm = null;
+    private CRServo climberHookLeft;
+    private CRServo climberHookRight;
 
-    private DcMotorEx pivot = null;
-    private Servo wrist = null;
 
-    public void initializeMotors() {
+
+    public void initializeMotors()
+    {
         frontLeftDrive = hardwareMap.get(DcMotorEx.class, "FL");
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
         backLeftDrive = hardwareMap.get(DcMotorEx.class, "BL");
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
+/*        climberMotorLeft = hardwareMap.get(DcMotorEx.class, "climberLeft");
+        climberMotorRight = hardwareMap.get(DcMotorEx.class, "climberRight");
+        arm = hardwareMap.get(DcMotorEx.class, "Arm");
+        shooter = hardwareMap.get(Servo.class, "shooter");
+        climberHookLeft = hardwareMap.get(CRServo.class, "climberHookLeft");
+        climberHookRight = hardwareMap.get(CRServo.class, "climberHookRight");*/
 
-        pivot = hardwareMap.get(DcMotorEx.class, "pivot");
-        slide = hardwareMap.get(DcMotorEx.class, "slide");
-
-        intake = hardwareMap.get(CRServo.class, "intake");
-        //shooter = hardwareMap.get(Servo.class, "shooter");
-
-        climberLeft = hardwareMap.get(DcMotorEx.class, "climberleft");
-
-        climberLeftArm = hardwareMap.get(Servo.class, "climberarmleft");
-
-        axe = hardwareMap.get(Servo.class, "axe");
-        wrist = hardwareMap.get(Servo.class, "wrist");
-
+        intakeLeft = hardwareMap.get(CRServo.class, "leftIntake");
+        intakeRight = hardwareMap.get(CRServo.class, "rightIntake");
 
         frontRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -77,35 +78,43 @@ public class hello extends LinearOpMode {
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+/*        climberMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        climberMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);*/
 
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        climberLeft.setTargetPosition(0);
-        climberLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        climberLeft.setPower(0.25);
+        /*climberMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        climberMotorLeft.setTargetPosition(0);
+        climberMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        climberMotorLeft.setPower(1);
 
-        pivot.setTargetPosition(0);
-        pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        pivot.setPower(0.25);
+        climberMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        climberMotorRight.setTargetPosition(0);
+        climberMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        climberMotorRight.setPower(1);
 
-        slide.setTargetPosition(0);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        slide.setPower(0.25);
-
-        wrist.setPosition(1);
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setPower(ARM_POWER);
+        arm.setTargetPositionTolerance(1);
+        arm.setTargetPosition(ARM_DRIVE);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
         // This sample expects the IMU to be in a REV Hub and named "imu".
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientationOnRobot));
+
+//        arm.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(1.5, 0.0, 0.0, 0.05));
+
+
     }
 
     private static void rotatePoints(double[] xPoints, double[] yPoints, double angle) {
@@ -118,15 +127,15 @@ public class hello extends LinearOpMode {
     }
 
 
-    public void dashboardDemo() {
+    public void dashboardDemo(){
         double time = getRuntime();
 
         double bx = ORBITAL_RADIUS * Math.cos(2 * Math.PI * ORBITAL_FREQUENCY * time);
         double by = ORBITAL_RADIUS * Math.sin(2 * Math.PI * ORBITAL_FREQUENCY * time);
         double l = SIDE_LENGTH / 2;
 
-        double[] bxPoints = {l, -l, -l, l};
-        double[] byPoints = {l, l, -l, -l};
+        double[] bxPoints = { l, -l, -l, l };
+        double[] byPoints = { l, l, -l, -l };
         rotatePoints(bxPoints, byPoints, 2 * Math.PI * SPIN_FREQUENCY * time);
         for (int i = 0; i < 4; i++) {
             bxPoints[i] += bx;
@@ -150,7 +159,7 @@ public class hello extends LinearOpMode {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
         double frontLeftPower = -(y + x + rx) / denominator; //A-RC has negative before parentheses and B-RC has no negative
         double backLeftPower = -(y - x + rx) / denominator;
-        double frontRightPower = (y - x - rx) / denominator;
+        double frontRightPower = -(y - x - rx) / denominator;
         double backRightPower = (y + x - rx) / denominator;
 
         frontLeftDrive.setPower(frontLeftPower * SPEED_MULTIPLIER);
@@ -161,68 +170,28 @@ public class hello extends LinearOpMode {
 
     }
 
+    private void climber() {
+        if (gamepad2.dpad_up) {
+            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
+            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
+        }
+        else if (gamepad2.dpad_down){
+            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() - 20);
+            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() - 20);
+        }
+    }
+
+
     public void armFunctions() {
-        if (gamepad1.right_bumper) {
-            intake.setPower(1);
-        } else if (gamepad1.left_bumper) {
-            intake.setPower(-1);
+        if (gamepad1.left_bumper) {
+            intakeLeft.setPower(1);
+            intakeRight.setPower(1);
+        } else if (gamepad1.right_bumper) {
+            intakeLeft.setPower(-1);
+            intakeRight.setPower(-1);
         } else {
-            intake.setPower(0);
-        }
-
-        if (gamepad2.a) {
-            slide.setTargetPosition(22);
-            if (slide.getCurrentPosition() >= 18 && slide.getCurrentPosition() <= 28){
-                wrist.setPosition(0.6);
-            }
-        }
-        else if (gamepad2.b){
-            wrist.setPosition(0);
-        }
-        else if (gamepad2.x){
-
-            wrist.setPosition(1);
-            if (wrist.getPosition() == 1){
-                slide.setTargetPosition(0);
-            }
-
-        }
-
-        if (gamepad1.x) {
-            axe.setPosition(0);
-        }
-        else if (gamepad1.y){
-            axe.setPosition(0.53);
-        }
-        else if (gamepad1.a) {
-            axe.setPosition(0.35);
-        }
-        else if (gamepad1.b)      {
-            axe.setPosition(0.17);
-        }
-
-        /*int encoderCount = arm.getCurrentPosition();
-        if (gamepad2.a) {
-            arm.setTargetPosition(ARM_DRIVE);
-        } else if (gamepad2.right_trigger > 0.3) {
-            arm.setTargetPosition(encoderCount + Math.round(40 * gamepad2.right_trigger));
-        } else if (gamepad2.left_trigger > 0.3) {
-            arm.setTargetPosition(encoderCount - Math.round(40 * gamepad2.left_trigger));
-        }*//*else if (gamepad2.b) {
-            arm.setTargetPosition(ARM_FRONTSCORE);
-        }
-        else if (gamepad2.x) {
-            arm.setTargetPosition(ARM_SCORE);
-        }*/
-
-        //TODO: Remove test
-        if (gamepad2.left_bumper) {
-            wrist.setPosition(1 - gamepad2.left_trigger);
-        } else if (gamepad2.dpad_up) {
-            slide.setTargetPosition(slide.getCurrentPosition() + 60);
-        } else if (gamepad2.dpad_down) {
-            slide.setTargetPosition(slide.getCurrentPosition() - 60);
-            slide.setTargetPosition(0);
+            intakeLeft.setPower(0);
+            intakeRight.setPower(0);
         }
 
     }
@@ -257,25 +226,21 @@ public class hello extends LinearOpMode {
     }
 
 
-    public void runOpMode() {
+
+
+    public void runOpMode()  {
         initializeMotors();
-
-        //intake.setDirection(Servo.Direction.FORWARD);
-        //intake.setPosition(0.5);
-
-        //shooter.scaleRange(0,1);
-        imu.resetYaw();
-        telemetry.addLine("test2");
-        updateTelemetry(telemetry);
         waitForStart();
-        telemetry.addLine(String.valueOf(opModeIsActive()));
-        updateTelemetry(telemetry);
+        imu.resetYaw();
         while (opModeIsActive()) {
+            // telemetry.addData("arm pos", arm.getCurrentPosition());
+            // telemetry.addData("arm pwr", arm.getCurrent(CurrentUnit.MILLIAMPS));
+            // climber();
+            /*if (gamepad2.dpad_up){
+                shooter.setPosition(0.9);
+            }*/
 
 //            telemetry.addData("climber pos", climberMotor.getCurrentPosition());
-            telemetry.addData("wrist pos", wrist.getPosition());
-            telemetry.addData("pivot pos", pivot.getCurrentPosition());
-            telemetry.addData("slide pos", slide.getCurrentPosition());
             updateTelemetry(telemetry);
 
             //joystickTankDrive();
