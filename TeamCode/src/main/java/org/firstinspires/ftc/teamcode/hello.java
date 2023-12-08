@@ -21,13 +21,17 @@ public class hello extends LinearOpMode {
     public static double SPIN_FREQUENCY = 0.25;
     public static double ORBITAL_RADIUS = 50;
     public static double SIDE_LENGTH = 10;
-    public static double SPEED_MULTIPLIER = 0.95;
 
     public static double INTAKE_OPEN_POS = 0.4;
     public static double INTAKE_CLOSE_POS = 0.6;
 
     public static int
             ARM_DRIVE = 0;
+
+    private static final double NORMAL_SPEED = 0.95;
+    private static final double SLOW_SPEED = 0.60;
+
+    public static double speed_multiplier = 0.95;
 
     private IMU imu = null;      // Control/Expansion Hub IMU
 
@@ -188,6 +192,12 @@ public class hello extends LinearOpMode {
         double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
         double rx = gamepad1.right_stick_x;
 
+        if (gamepad1.left_trigger > 0.5) {
+            speed_multiplier = SLOW_SPEED;
+        } else {
+            speed_multiplier = NORMAL_SPEED;
+        }
+
 
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio,
@@ -198,10 +208,10 @@ public class hello extends LinearOpMode {
         double frontRightPower = -(y - x - rx) / denominator;
         double backRightPower = (y + x - rx) / denominator;
 
-        frontLeftDrive.setPower(frontLeftPower * SPEED_MULTIPLIER);
-        backLeftDrive.setPower(backLeftPower * SPEED_MULTIPLIER);
-        frontRightDrive.setPower(frontRightPower * SPEED_MULTIPLIER);
-        backRightDrive.setPower(backRightPower * SPEED_MULTIPLIER);
+        frontLeftDrive.setPower(frontLeftPower * speed_multiplier);
+        backLeftDrive.setPower(backLeftPower * speed_multiplier);
+        frontRightDrive.setPower(frontRightPower * speed_multiplier);
+        backRightDrive.setPower(backRightPower * speed_multiplier);
 
 
     }
