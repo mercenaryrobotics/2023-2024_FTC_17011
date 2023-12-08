@@ -46,12 +46,22 @@ public class hello extends LinearOpMode {
 
     private Servo shooter = null;
 
+    private Servo intakeWrist = null;
     private CRServo intakeLeft = null;
     private CRServo intakeRight = null;
 
     private DcMotorEx arm = null;
     private CRServo climberHookLeft;
     private CRServo climberHookRight;
+
+    private double intakeWristTarget;
+    private IntakeWristState intakeWristState;
+
+    enum IntakeWristState {
+        DEFAULT,
+        SLOW_MOVING,
+        SLOW_DONE;
+    }
 
 
 
@@ -71,8 +81,13 @@ public class hello extends LinearOpMode {
         intakeLeft = hardwareMap.get(CRServo.class, "leftIntake");
         intakeRight = hardwareMap.get(CRServo.class, "rightIntake");
 
+        intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
+
         frontRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intakeWrist.setDirection(Servo.Direction.FORWARD);
+        intakeWrist.setPosition(0);
 
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -115,6 +130,27 @@ public class hello extends LinearOpMode {
 //        arm.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(1.5, 0.0, 0.0, 0.05));
 
 
+    }
+
+    private void moveIntakeWrist(double position, IntakeWristState mode) {
+        intakeWristTarget = position;
+        if (mode == IntakeWristState.DEFAULT) {
+            intakeWrist.setPosition(intakeWristTarget);
+        } else {
+            intakeWristState = IntakeWristState.SLOW_MOVING;
+        }
+    }
+
+    private void intakeWristLoop() {
+        if (intakeWristTarget + 0.01 >= intakeWrist.getPosition() && intakeWristTarget - 0.01 <= intakeWrist.getPosition()) {
+            intakeWristState = IntakeWristState.SLOW_DONE;
+        }
+        else if (intakeWristState == IntakeWristState.SLOW_MOVING) {
+            intakeWrist.setPosition(intakeWrist.getPosition() + ((intakeWristTarget - intakeWrist.getPosition()) / 250));
+        }
+
+        telemetry.addData("target", intakeWristTarget);
+        telemetry.addData("cur", intakeWrist.getPosition());
     }
 
     private static void rotatePoints(double[] xPoints, double[] yPoints, double angle) {
@@ -193,7 +229,15 @@ public class hello extends LinearOpMode {
             intakeLeft.setPower(0);
             intakeRight.setPower(0);
         }
-
+        if (gamepad1.dpad_left) {
+            moveIntakeWrist(0, IntakeWristState.SLOW_MOVING);
+        }
+        else if (gamepad1.dpad_right) {
+            moveIntakeWrist(0.5, IntakeWristState.DEFAULT);
+        }
+        else if (gamepad1.dpad_up) {
+            moveIntakeWrist(0.05, IntakeWristState.DEFAULT);
+        }
     }
 
     private void fieldCentricDrive() {
@@ -230,6 +274,7 @@ public class hello extends LinearOpMode {
 
     public void runOpMode()  {
         initializeMotors();
+        moveIntakeWrist(0, IntakeWristState.DEFAULT);
         waitForStart();
         imu.resetYaw();
         while (opModeIsActive()) {
@@ -247,6 +292,7 @@ public class hello extends LinearOpMode {
             joystickMecanumDrive();
             armFunctions();
             //fieldCentricDrive();
+            intakeWristLoop();
         }
     }
 }
