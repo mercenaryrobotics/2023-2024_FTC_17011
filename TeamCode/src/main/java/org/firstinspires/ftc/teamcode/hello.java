@@ -19,9 +19,7 @@ public class hello extends LinearOpMode {
     private static final double NORMAL_SPEED = 0.95;
     private static final double SLOW_SPEED = 0.60;
 
-    public static double speed_multiplier = 0.95;
-
-    private IMU imu = null;      // Control/Expansion Hub IMU
+    private IMU imu = null; // Control/Expansion Hub IMU
 
     //Motor demo variables
     private DcMotorEx frontLeftDrive = null;
@@ -29,13 +27,13 @@ public class hello extends LinearOpMode {
     private DcMotorEx backLeftDrive = null;
     private DcMotorEx backRightDrive = null;
 
-    private DcMotorEx climberMotorLeft = null;
-    private DcMotorEx climberMotorRight = null;
+    private final DcMotorEx climberMotorLeft = null;
+    private final DcMotorEx climberMotorRight = null;
 
-    private Servo climberHookLeft = null;
-    private Servo climberHookRight = null;
+    private final Servo climberHookLeft = null;
+    private final Servo climberHookRight = null;
 
-    private Servo shooter = null;
+    private final Servo shooter = null;
 
     private Servo intakeWrist = null;
     private CRServo intakeLeft = null;
@@ -55,26 +53,16 @@ public class hello extends LinearOpMode {
 
 
 
-    public void initializeMotors()
+    private void initializeMotors()
     {
+        // Drive
         frontLeftDrive = hardwareMap.get(DcMotorEx.class, "FL");
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
         backLeftDrive = hardwareMap.get(DcMotorEx.class, "BL");
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
 
-        intakeLeft = hardwareMap.get(CRServo.class, "leftIntake");
-        intakeRight = hardwareMap.get(CRServo.class, "rightIntake");
-        intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
-
-        outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
-        outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
-
         frontRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        intakeWrist.setDirection(Servo.Direction.FORWARD);
-        outtakeRight.setDirection(Servo.Direction.REVERSE);
-        intakeWrist.setPosition(0);
 
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -86,6 +74,20 @@ public class hello extends LinearOpMode {
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // Intake
+        intakeLeft = hardwareMap.get(CRServo.class, "leftIntake");
+        intakeRight = hardwareMap.get(CRServo.class, "rightIntake");
+        intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
+
+        intakeWrist.setDirection(Servo.Direction.FORWARD);
+        moveIntakeWrist(0, IntakeWristState.DEFAULT);
+
+        // Out-take
+        outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
+        outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
+        outtakeRight.setDirection(Servo.Direction.REVERSE);
+
+        // Climber
         /*climberMotorLeft = hardwareMap.get(DcMotorEx.class, "climberLeft");
         climberMotorRight = hardwareMap.get(DcMotorEx.class, "climberRight");
         climberHookLeft = hardwareMap.get(Servo.class, "climberHookLeft");
@@ -105,6 +107,12 @@ public class hello extends LinearOpMode {
         climberMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         climberMotorRight.setPower(1);*/
 
+        // TODO: Remove test
+        outtakeLeft.setPosition(0);
+        outtakeRight.setPosition(0);
+    }
+
+    private void initializeImu() {
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
         RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
@@ -113,10 +121,6 @@ public class hello extends LinearOpMode {
         // This sample expects the IMU to be in a REV Hub and named "imu".
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientationOnRobot));
-
-        // TODO: Remove test
-        outtakeLeft.setPosition(0);
-        outtakeRight.setPosition(0);
     }
 
     private void moveIntakeWrist(double position, IntakeWristState mode) {
@@ -143,6 +147,7 @@ public class hello extends LinearOpMode {
         double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
         double rx = gamepad1.right_stick_x;
 
+        double speed_multiplier;
         if (gamepad1.left_trigger > 0.5) {
             speed_multiplier = SLOW_SPEED;
         } else {
@@ -165,60 +170,6 @@ public class hello extends LinearOpMode {
         backRightDrive.setPower(backRightPower * speed_multiplier);
 
 
-    }
-
-
-    private void climber() {
-        /* only for the manual controls */
-        if (gamepad1.dpad_up) {
-            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
-            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
-        }
-        else if (gamepad1.dpad_down){
-            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() - 20);
-            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() - 20);
-        }
-
-        /* actual controls for comp climb */
-        if (gamepad2.dpad_up){
-            climberMotorLeft.setTargetPosition(4000);
-            climberMotorRight.setTargetPosition(3800);
-        }
-        else if (gamepad2.dpad_down){
-            climberMotorLeft.setTargetPosition(0);
-            climberMotorRight.setTargetPosition(0);
-        }
-        if (gamepad2.dpad_left) {
-            climberHookLeft.setPosition(0);
-            climberHookRight.setPosition(0);
-        }
-        else if (gamepad2.dpad_right){
-            climberHookLeft.setPosition(0.4);
-            climberHookRight.setPosition(0.42);
-        }
-    }
-
-
-    public void armFunctions() {
-        if (gamepad1.left_bumper) {
-            intakeLeft.setPower(1);
-            intakeRight.setPower(1);
-        } else if (gamepad1.right_bumper) {
-            intakeLeft.setPower(-1);
-            intakeRight.setPower(-1);
-        } else {
-            intakeLeft.setPower(0);
-            intakeRight.setPower(0);
-        }
-        if (gamepad1.dpad_left) {
-            moveIntakeWrist(0, IntakeWristState.SLOW_MOVING);
-        }
-        else if (gamepad1.dpad_right) {
-            moveIntakeWrist(0.5, IntakeWristState.DEFAULT);
-        }
-        else if (gamepad1.dpad_up) {
-            moveIntakeWrist(0.05, IntakeWristState.DEFAULT);
-        }
     }
 
     private void fieldCentricDrive() {
@@ -249,12 +200,63 @@ public class hello extends LinearOpMode {
         backRightDrive.setPower(backRightPower);
     }
 
+    private void climberFunctions() {
+        /* only for the manual controls */
+        if (gamepad1.dpad_up) {
+            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
+            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
+        }
+        else if (gamepad1.dpad_down){
+            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() - 20);
+            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() - 20);
+        }
+
+        /* actual controls for comp climb */
+        if (gamepad2.dpad_up){
+            climberMotorLeft.setTargetPosition(4000);
+            climberMotorRight.setTargetPosition(3800);
+        }
+        else if (gamepad2.dpad_down){
+            climberMotorLeft.setTargetPosition(0);
+            climberMotorRight.setTargetPosition(0);
+        }
+        if (gamepad2.dpad_left) {
+            climberHookLeft.setPosition(0);
+            climberHookRight.setPosition(0);
+        }
+        else if (gamepad2.dpad_right){
+            climberHookLeft.setPosition(0.4);
+            climberHookRight.setPosition(0.42);
+        }
+    }
 
 
+    private void armFunctions() {
+        if (gamepad1.left_bumper) {
+            intakeLeft.setPower(1);
+            intakeRight.setPower(1);
+        } else if (gamepad1.right_bumper) {
+            intakeLeft.setPower(-1);
+            intakeRight.setPower(-1);
+        } else {
+            intakeLeft.setPower(0);
+            intakeRight.setPower(0);
+        }
+        if (gamepad1.dpad_left) {
+            moveIntakeWrist(0, IntakeWristState.SLOW_MOVING);
+        }
+        else if (gamepad1.dpad_right) {
+            moveIntakeWrist(0.5, IntakeWristState.DEFAULT);
+        }
+        else if (gamepad1.dpad_up) {
+            moveIntakeWrist(0.05, IntakeWristState.DEFAULT);
+        }
+    }
 
     public void runOpMode()  {
         initializeMotors();
-        moveIntakeWrist(0, IntakeWristState.DEFAULT);
+        initializeImu();
+
         waitForStart();
         imu.resetYaw();
         while (opModeIsActive()) {
