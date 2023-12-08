@@ -41,6 +41,9 @@ public class hello extends LinearOpMode {
     private CRServo intakeLeft = null;
     private CRServo intakeRight = null;
 
+    private Servo outtakeLeft = null;
+    private Servo outtakeRight = null;
+
     private double intakeWristTarget;
     private IntakeWristState intakeWristState;
 
@@ -61,13 +64,16 @@ public class hello extends LinearOpMode {
 
         intakeLeft = hardwareMap.get(CRServo.class, "leftIntake");
         intakeRight = hardwareMap.get(CRServo.class, "rightIntake");
-
         intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
+
+        outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
+        outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
 
         frontRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intakeWrist.setDirection(Servo.Direction.FORWARD);
+        outtakeRight.setDirection(Servo.Direction.REVERSE);
         intakeWrist.setPosition(0);
 
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -80,7 +86,7 @@ public class hello extends LinearOpMode {
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        climberMotorLeft = hardwareMap.get(DcMotorEx.class, "climberLeft");
+        /*climberMotorLeft = hardwareMap.get(DcMotorEx.class, "climberLeft");
         climberMotorRight = hardwareMap.get(DcMotorEx.class, "climberRight");
         climberHookLeft = hardwareMap.get(Servo.class, "climberHookLeft");
         climberHookRight = hardwareMap.get(Servo.class, "climberHookRight");
@@ -97,7 +103,7 @@ public class hello extends LinearOpMode {
         climberMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         climberMotorRight.setTargetPosition(0);
         climberMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        climberMotorRight.setPower(1);
+        climberMotorRight.setPower(1);*/
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
         RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
@@ -107,6 +113,10 @@ public class hello extends LinearOpMode {
         // This sample expects the IMU to be in a REV Hub and named "imu".
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientationOnRobot));
+
+        // TODO: Remove test
+        outtakeLeft.setPosition(0);
+        outtakeRight.setPosition(0);
     }
 
     private void moveIntakeWrist(double position, IntakeWristState mode) {
@@ -125,9 +135,6 @@ public class hello extends LinearOpMode {
         else if (intakeWristState == IntakeWristState.SLOW_MOVING) {
             intakeWrist.setPosition(intakeWrist.getPosition() + ((intakeWristTarget - intakeWrist.getPosition()) / 250));
         }
-
-        telemetry.addData("target", intakeWristTarget);
-        telemetry.addData("cur", intakeWrist.getPosition());
     }
 
     private void joystickMecanumDrive() {
@@ -218,7 +225,6 @@ public class hello extends LinearOpMode {
         double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = -gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
         double rx = -gamepad1.right_stick_x;
-        double lf = -gamepad2.left_stick_y;
 
         // Calculate the current angle of the robot (yaw) relative to the field.
         double robotAngle = -Math.toRadians(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)); // Modify this to get the actual robot angle.
@@ -255,7 +261,13 @@ public class hello extends LinearOpMode {
             joystickMecanumDrive();
             fieldCentricDrive();
 
-            climber();
+            //TODO: Remove test
+            if (gamepad2.a) {
+                outtakeLeft.setPosition(1);
+                outtakeRight.setPosition(1);
+            }
+
+            //climber();
             armFunctions();
             slowServoLoop(); // for slow wrist control
 
