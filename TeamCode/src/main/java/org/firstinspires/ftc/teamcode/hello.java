@@ -96,7 +96,7 @@ lift.setPower(0.3);
 
 
         intakeWrist.setDirection(Servo.Direction.FORWARD);
-        moveIntakeWrist(0, IntakeWristState.DEFAULT);
+        moveIntakeWrist(0.05, IntakeWristState.DEFAULT);
 
          //Out-take
         outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
@@ -128,7 +128,8 @@ lift.setPower(0.3);
         sleep(1);
 
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift .setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setTargetPosition(0);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
     }
 
@@ -179,16 +180,20 @@ lift.setPower(0.3);
         // This ensures all the powers maintain the same ratio,
         // but only if at least one is out of the range [-1, 1]
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double frontLeftPower = -(y + x + rx) / denominator; //A-RC has negative before parentheses and B-RC has no negative
-        double backLeftPower = -(y - x + rx) / denominator;
-        double frontRightPower = -(y - x - rx) / denominator;
-        double backRightPower = (y + x - rx) / denominator;
+        double frontLeftPower = -(y + rx + x) / denominator; //A-RC has negative before parentheses and B-RC has no negative
+        double backLeftPower = -(y - rx + x) / denominator;
+        double frontRightPower = (y - rx - x) / denominator;
+        double backRightPower = -(y + rx - x) / denominator;
 
         frontLeftDrive.setPower(frontLeftPower * speed_multiplier);
         backLeftDrive.setPower(backLeftPower * speed_multiplier);
         frontRightDrive.setPower(frontRightPower * speed_multiplier);
         backRightDrive.setPower(backRightPower * speed_multiplier);
 
+        telemetry.addData("backRightPower", backRightPower);
+        telemetry.addData("backLeftPower", backLeftPower);
+        telemetry.addData("frontRightPower", frontRightPower);
+        telemetry.addData("frontLeftPower", frontLeftPower);
 
     }
 
@@ -250,7 +255,6 @@ lift.setPower(0.3);
         }
         telemetry.addData("climberMotorLeft", climberMotorLeft.getCurrentPosition());
         telemetry.addData("climberMotorRight", climberMotorRight.getCurrentPosition());
-        telemetry.update();
 
     }
 
@@ -266,17 +270,12 @@ lift.setPower(0.3);
         }
         /* for intake wrist */
         else if (gamepad1.dpad_left) {
-            moveIntakeWrist(0, IntakeWristState.SLOW_MOVING);
+            moveIntakeWrist(0.05, IntakeWristState.SLOW_MOVING);
         }
         else if (gamepad1.dpad_right) {
-            moveIntakeWrist(0.725, IntakeWristState.DEFAULT);
+            moveIntakeWrist(0.70, IntakeWristState.DEFAULT);
             intakeLeft.setPower(-1);
             intakeRight.setPower(-1);
-
-        }
-        else if (gamepad1.dpad_up) {
-            moveIntakeWrist(0.05, IntakeWristState.SLOW_MOVING);
-
 
         } else {
             intakeLeft.setPower(0);
@@ -312,9 +311,9 @@ lift.setPower(0.3);
         imu.resetYaw();
         while (opModeIsActive()) {
             joystickMecanumDrive();
-            fieldCentricDrive();
+            //fieldCentricDrive();
 
-            //climberFunctions();
+            climberFunctions();
             armFunctions();
             slowServoLoop(); // for slow wrist control
 
