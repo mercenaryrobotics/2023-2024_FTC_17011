@@ -4,15 +4,13 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.drive.OurMecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -34,41 +32,31 @@ import java.util.Locale;
 
 @Autonomous (name="New Comp Blue Auton", group="Robot")
 public class new_blue_auton extends LinearOpMode {
-    public static double ORBITAL_FREQUENCY = 0.05;
-    public static double SPIN_FREQUENCY = 0.25;
-    public static double ORBITAL_RADIUS = 50;
-    public static double SIDE_LENGTH = 10;
-
-    public static double DRIVE_SPEED = 0.7;
-    public static double TURN_SPEED = 0.3;
-
-    static final double     COUNTS_PER_MOTOR_REV    = 537.7;
-    static final double     DRIVE_GEAR_REDUCTION    = 1.0;
-    static final double     WHEEL_DIAMETER_INCHES   = 3.779;
-    static final double     COUNTS_PER_INCH         =
-            (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                    (WHEEL_DIAMETER_INCHES * 3.1415);
-
-    //Motor demo variables
     private DcMotorEx frontLeftDrive = null;
     private DcMotorEx frontRightDrive = null;
     private DcMotorEx backLeftDrive = null;
     private DcMotorEx backRightDrive = null;
-    private OurMecanumDrive drive = null;
 
-    private DcMotorEx climberMoter = null;
+    private DcMotorEx pivot = null;
+    private DcMotorEx lift = null;
 
-    //public static int isTeamRed = 1;
-    //if -1, blue, if 1, red
+    private Servo intakeWrist = null;
+    private CRServo intakeLeft = null;
+    private CRServo intakeRight = null;
 
-    private int isStartBackdrop = 1;
+    private Servo outtakeLeft = null;
+    private Servo outtakeRight = null;
 
-    private int isStartStation = -1;
-    private Servo intake = null;
+    private Servo outtakeWrist = null;
+    private double intakeWristTarget;
+    private IntakeWristState intakeWristState;
 
-    private DcMotorEx arm = null;
+    enum IntakeWristState {
+        DEFAULT,
+        SLOW_MOVING,
+        SLOW_DONE
+    }
 
-    private ElapsedTime runtime = new ElapsedTime();
 
     private FtcDashboard dashboard;
     int aprilTagValue = -1;
@@ -94,214 +82,6 @@ public class new_blue_auton extends LinearOpMode {
         }
         telemetry.addData("x value", GolfBotIPCVariables.ballX);
         telemetry.addData("aprilTag value", aprilTagValue);
-        telemetry.addData("isStartBackdrop", isStartBackdrop);
-    }
-
-    private void station() {
-        intake.scaleRange(0, 1);
-        intake.setDirection(Servo.Direction.FORWARD);
-
-        if (aprilTagValue==(3)){
-            intake.setPosition(0.6);
-            sleep(200);
-            arm.setTargetPosition(-40);
-            sleep(300);
-            arm.setTargetPosition(-40);
-            drive(1000,1000,1000,1000,0.6);
-            sleep(200);
-            drive(700,-700,700,-700,0.4);
-            sleep(200);
-            drive(300,300,300,300, 0.3);
-            sleep(300);
-            arm.setTargetPosition(0);
-            sleep(100);
-            intake.setPosition(0.4);
-            arm.setTargetPosition(0);
-            drive(-300,-300,-300,-300, 0.3);
-            sleep(200);
-            drive(-700,700,-700,700,0.4);
-            sleep(150);
-            drive(-1000,-1000,-1000,-1000,0.6);
-            sleep(100000);
-        }
-        else if (aprilTagValue==(2)) {
-            intake.setPosition(0.6);
-            arm.setTargetPosition(-40);
-            sleep(300);
-            drive(1300,1300,1300,1300,0.4);
-            sleep(300);
-            arm.setTargetPosition(0);
-            sleep(300);
-            intake.setPosition(0.4);
-            arm.setTargetPosition(0);
-            sleep(200);
-            drive(-700,-700,-700,-700,0.3);
-            sleep(100000);
-
-        }
-        else if (aprilTagValue==(1)){
-            intake.setPosition(0.6);
-            sleep(300);
-            arm.setTargetPosition(-50);
-            drive(1000,1000,1000,1000,0.4);
-            sleep(300);
-            drive(-500,500,-500,500,0.4);
-            sleep(300);
-            drive(300,300,300,300, 0.5);
-            sleep(200);
-            arm.setTargetPosition(0);
-            sleep(300);
-            intake.setPosition(0.4);
-            drive(-300,-300,-300,-300, 0.5);
-            sleep(500);
-            drive(500,-500,500,-500,0.4);
-            drive(-1000,-1000,-1000,-1000,0.6);
-            sleep(100000);
-        }
-    }
-    private void backDrop() {
-        intake.scaleRange(0, 1);
-        intake.setDirection(Servo.Direction.FORWARD);
-
-        if (aprilTagValue==(3)){
-            intake.setPosition(0.6);
-            sleep(200);
-            arm.setTargetPosition(-40);
-            sleep(300);
-            arm.setTargetPosition(-40);
-            drive(1000,1000,1000,1000,0.6);
-            sleep(200);
-            drive(700,-700,700,-700,0.4);
-            sleep(200);
-            drive(300,300,300,300, 0.3);
-            sleep(300);
-            arm.setTargetPosition(0);
-            sleep(100);
-            intake.setPosition(0.4);
-            arm.setTargetPosition(0);
-            drive(-300,-300,-300,-300, 0.3);
-            sleep(200);
-            drive(-700,700,-700,700,0.4);
-            sleep(150);
-            drive(-2050, 2050,-2050,2050, 0.5);
-            sleep(200);
-            drive(490,-490,-490,490,0.5);
-            sleep(300);
-            drive(1000,1000,1000,1000,0.25);
-            sleep(300);
-            intake.setPosition(0.6);
-            sleep(500);
-            drive(-1400,-1400,-1400,-1400,0.3);
-            sleep(200);
-            drive(970, -970,970,-970, 0.6);
-            sleep(300);
-            arm.setTargetPosition(-50);
-            sleep(300);
-            drive(900, 900, 900, 900, 0.5);
-            sleep(300);
-            intake.setPosition(0.6);
-            arm.setTargetPosition(-150);
-            sleep(300);
-            drive(550, 550, 550, 550, 0.2);
-            sleep(500);
-            intake.setPosition(0.4);
-            sleep(500);
-            drive(-300, -300, -300, -300, 0.2);
-            arm.setTargetPosition(0);
-            sleep(500);
-            drive(-800,800,800,-800,0.5);
-        }
-        else if (aprilTagValue==(2)) {
-            intake.setPosition(0.6);
-            arm.setTargetPosition(-40);
-            sleep(300);
-            drive(1300,1300,1300,1300,0.4);
-            sleep(300);
-            arm.setTargetPosition(0);
-            sleep(300);
-            intake.setPosition(0.4);
-            arm.setTargetPosition(0);
-            sleep(200);
-            drive(-700,-700,-700,-700,0.3);
-            sleep(100);
-            drive(-2000, 2000,-2000,2000, 0.6);
-            sleep(300);
-            drive(500,-500,-500,500,0.5);
-            sleep(300);
-            drive(450,450,450,450,0.4);
-            sleep(300);
-            intake.setPosition(0.6);
-            sleep(500);
-            drive(-1000,-1000,-1000,-1000,0.3);
-            sleep(200);
-            drive(970, -970,970,-970, 0.6);
-            sleep(300);
-            arm.setTargetPosition(-50);
-            sleep(300);
-            drive(900, 900, 900, 900, 0.5);
-            sleep(300);
-            intake.setPosition(0.6);
-            arm.setTargetPosition(-150);
-            sleep(300);
-            drive(550, 550, 550, 550, 0.2);
-            sleep(500);
-            intake.setPosition(0.4);
-            sleep(500);
-            drive(-300, -300, -300, -300, 0.2);
-            arm.setTargetPosition(0);
-            sleep(500);
-            drive(-800,800,800,-800,0.5);
-        }
-        else if (aprilTagValue==(1)){
-            intake.setPosition(0.6);
-            sleep(300);
-            arm.setTargetPosition(-50);
-            drive(1000,1000,1000,1000,0.4);
-            sleep(300);
-            drive(-500,500,-500,500,0.4);
-            sleep(300);
-            drive(300,300,300,300, 0.5);
-            sleep(200);
-            arm.setTargetPosition(0);
-            sleep(300);
-            intake.setPosition(0.4);
-            drive(-300,-300,-300,-300, 0.5);
-            sleep(500);
-            drive(-1550,1550,-1550,1550,0.4);
-            sleep(300);
-            drive(490,-490,-490,490,0.5);
-            sleep(300);
-            drive(1000,1000,1000,1000,0.25);
-            sleep(300);
-            intake.setPosition(0.6);
-            sleep(500);
-            drive(-800,-800,-800,-800,0.3);
-            sleep(200);
-            drive(970, -970,970,-970, 0.6);
-            sleep(300);
-            arm.setTargetPosition(-50);
-            sleep(300);
-            drive(950, 950, 950, 950, 0.5);
-            sleep(300);
-            intake.setPosition(0.6);
-            arm.setTargetPosition(-150);
-            sleep(300);
-            drive(550, 550, 550, 550, 0.2);
-            sleep(500);
-            intake.setPosition(0.4);
-            sleep(500);
-            drive(-300, -300, -300, -300, 0.2);
-            arm.setTargetPosition(0);
-            sleep(500);
-            drive(-1000,1000,1000,-1000,0.5);
-        }
-
-        while (opModeIsActive()) {
-
-            telemetry.addData("x value", GolfBotIPCVariables.ballX);
-            telemetry.addData("aprilTag value", aprilTagValue);
-            telemetry.update();
-        }
     }
 
     int BackRightPos;
@@ -315,18 +95,22 @@ public class new_blue_auton extends LinearOpMode {
         BackLeftPos -= BackLeftTarget;
         FrontLeftPos -= FrontLeftTarget;
         FrontRightPos += FrontRightTarget;
+
         backLeftDrive.setTargetPosition(BackLeftPos);
         backRightDrive.setTargetPosition(BackRightPos);
         frontLeftDrive.setTargetPosition(FrontLeftPos);
         frontRightDrive.setTargetPosition(FrontRightPos);
+
         frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         frontRightDrive.setPower(speed);
         frontLeftDrive.setPower(speed);
         backRightDrive.setPower(speed);
         backLeftDrive.setPower(speed);
+
         while (opModeIsActive() && frontRightDrive.isBusy() && frontLeftDrive.isBusy() && backRightDrive.isBusy() && backLeftDrive.isBusy()) {
             idle();
         }
@@ -336,14 +120,9 @@ public class new_blue_auton extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
         backLeftDrive = hardwareMap.get(DcMotorEx.class, "BL");
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
-        //climberMoter = hardwareMap.get(DcMotorEx.class, "climber");
-        arm = hardwareMap.get(DcMotorEx.class, "Arm");
-        intake = hardwareMap.get(Servo.class, "intake");
-
 
         frontRightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
         backRightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        //climberMoter.setDirection(DcMotorSimple.Direction.REVERSE);
 
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -361,15 +140,6 @@ public class new_blue_auton extends LinearOpMode {
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //climberMoter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setPower(0.2);
-        arm.setTargetPositionTolerance(1);
-        arm.setTargetPosition(0);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
     }
 
     private void initializeDashboard() {
@@ -434,54 +204,41 @@ public class new_blue_auton extends LinearOpMode {
         initializeVision();
         FtcDashboard.getInstance().startCameraStream(webcam, 30);
 
-        // TODO: Kevin's TODO List
-        // TODO: State Machine
-        // TODO: Road Runner
         // TODO: Remove horrible drive function
         // TODO: Use a circularity in vision to determine if ready
-        
-        // Road Runner
-        drive = new OurMecanumDrive(hardwareMap);
 
         while (!isStarted()) {
             aprilTagDetection();
+        } while (isStarted()) {
+            switch (state) {
+                case POST_INIT:
+                    // Post-Init
+                    // Determine state based off of AprilTag
+                    switch (aprilTagValue) {
+                        case 1:
+                            state = RunState.TAG_VALUE_1;
+                            break;
+                        case 2:
+                            state = RunState.TAG_VALUE_2;
+                            break;
+                        case 3:
+                            state = RunState.TAG_VALUE_3;
+                            break;
+                        default:
+                            state = RunState.UNKNOWN;
+                            break;
+                    }
+                    break;
+                case AUTON_COMPLETE:
+                    // We're done
+                    break;
+                case UNKNOWN:
+                    // Uh oh
+                    // Assume something went wrong and start over
+                    state = RunState.POST_INIT;
+                    break;
+            }
         }
-
-        switch (state) {
-            case POST_INIT:
-                // Post-Init
-                // Determine state based off of AprilTag
-                switch (aprilTagValue) {
-                    case 1:
-                        state = RunState.TAG_VALUE_1;
-                        break;
-                    case 2:
-                        state = RunState.TAG_VALUE_2;
-                        break;
-                    case 3:
-                        state = RunState.TAG_VALUE_3;
-                        break;
-                    default:
-                        state = RunState.UNKNOWN;
-                        break;
-                }
-                break;
-            case AUTON_COMPLETE:
-                // We're done
-                break;
-            case UNKNOWN:
-                // Uh oh
-                // Assume something went wrong and start over
-                state = RunState.POST_INIT;
-                break;
-        }
-
-        if (isStartBackdrop == 1)
-            backDrop();
-
-        if (isStartBackdrop == -1)
-            station();
-
     }
 }
 
