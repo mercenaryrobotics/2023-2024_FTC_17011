@@ -439,12 +439,12 @@ class BlueOpenCVPipeline extends OpenCvPipeline {
          * to change which stage of the pipeline is rendered to the viewport when it is
          * tapped, please see {@link PipelineStageSwitchingExample}
          */
-        DisplayImage.copyTo(input);
+/*        DisplayImage.copyTo(input);
         DisplayImage.release();
 
         TestImage.copyTo((input));
-        TestImage.release();
-        return input;
+        TestImage.release();*/
+        return DisplayImage;
     }
 
 }

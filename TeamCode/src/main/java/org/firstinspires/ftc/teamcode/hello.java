@@ -65,8 +65,6 @@ public class hello extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
         backLeftDrive = hardwareMap.get(DcMotorEx.class, "BL");
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
-        pivot = hardwareMap.get(DcMotorEx.class, "pivot");
-        lift = hardwareMap.get(DcMotorEx.class, "lift");
 
         frontRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -76,31 +74,35 @@ public class hello extends LinearOpMode {
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // Pivot
+        pivot = hardwareMap.get(DcMotorEx.class, "pivot");
         pivot.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         pivot.setDirection(DcMotorSimple.Direction.REVERSE);
-        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-lift.setPower(0.3);
+        // Lift
+        lift = hardwareMap.get(DcMotorEx.class, "lift");
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setPower(0.3);
+
         // Intake
         intakeLeft = hardwareMap.get(CRServo.class, "leftIntake");
         intakeRight = hardwareMap.get(CRServo.class, "rightIntake");
         intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
-        outtakeWrist = hardwareMap.get(Servo.class, "outtakeWrist");
 
-
-
-        intakeWrist.setDirection(Servo.Direction.FORWARD);
         moveIntakeWrist(0.05, IntakeWristState.DEFAULT);
 
-         //Out-take
+        //Out-take
         outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
         outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
+        outtakeWrist = hardwareMap.get(Servo.class, "outtakeWrist");
+
         outtakeRight.setDirection(Servo.Direction.REVERSE);
 
         // Climber
@@ -229,17 +231,17 @@ lift.setPower(0.3);
         /* only for the manual controls */
         if (gamepad1.dpad_up) {
             climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() +- 20);
-            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
+            climberMotorRight.setTargetPosition(climberMotorRight.getTargetPosition() + 20);
         }
         else if (gamepad1.dpad_down){
             climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
-            climberMotorRight.setTargetPosition(climberMotorLeft.getTargetPosition() - 20);
+            climberMotorRight.setTargetPosition(climberMotorRight.getTargetPosition() - 20);
         }
 
         /* actual controls for comp climb */
         if (gamepad2.dpad_up){
-            climberMotorLeft.setTargetPosition(-4000);
-            climberMotorRight.setTargetPosition(4000);
+            climberMotorLeft.setTargetPosition(-1000);
+            climberMotorRight.setTargetPosition(1000);
         }
         else if (gamepad2.dpad_down){
             climberMotorLeft.setTargetPosition(0);
@@ -297,10 +299,6 @@ lift.setPower(0.3);
             else if (gamepad2.b) {
                 lift.setTargetPosition(300);
             }
-
-        /* lift */
-
-
         }
     }
 
