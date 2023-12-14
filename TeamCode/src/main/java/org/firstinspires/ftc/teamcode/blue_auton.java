@@ -34,6 +34,7 @@ import java.util.Locale;
 
 
 @Autonomous (name="BlueAuton", group="Robot")
+@Disabled
 public class blue_auton extends LinearOpMode {
     public static double ORBITAL_FREQUENCY = 0.05;
     public static double SPIN_FREQUENCY = 0.25;

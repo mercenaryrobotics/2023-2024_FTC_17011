@@ -72,14 +72,14 @@ public class blueAuto extends LinearOpMode {
 private void notStarted() {
     while (!isStarted()) {
 
-        if (GolfBotIPCVariables.ballX < 300 && GolfBotIPCVariables.ballX > 50) {
+        if (AutonIPCVariables.ballX < 300 && AutonIPCVariables.ballX > 50) {
             aprilTagValue = 2;
-        } else if (GolfBotIPCVariables.ballX > -167 && GolfBotIPCVariables.ballX < -112) {
+        } else if (AutonIPCVariables.ballX > -167 && AutonIPCVariables.ballX < -112) {
             aprilTagValue = 1;
         } else {
             aprilTagValue = 3;
         }
-        telemetry.addData("x value", GolfBotIPCVariables.ballX);
+        telemetry.addData("x value", AutonIPCVariables.ballX);
         telemetry.addData("aprilTag value", aprilTagValue);
         telemetry.addData("isStartBackdrop", isStartBackdrop);
         telemetry.update();
@@ -301,7 +301,7 @@ private void backDrop() {
 
     while (opModeIsActive()) {
 
-        telemetry.addData("x value", GolfBotIPCVariables.ballX);
+        telemetry.addData("x value", AutonIPCVariables.ballX);
         telemetry.addData("aprilTag value", aprilTagValue);
         telemetry.update();
     }
@@ -614,7 +614,7 @@ class BlueOurOpenCVPipeline extends OpenCvPipeline {
 
         // Get largest contour (hopefully ball)
         int largest_contour_index = getLargestContourIndex(contours);
-        GolfBotIPCVariables.foundBallArea = getLargestContourArea(contours);
+        AutonIPCVariables.foundBallArea = getLargestContourArea(contours);
         boolean foundBall = largest_contour_index > -1;
 
         // Find the contours and bounding regions
@@ -640,11 +640,11 @@ class BlueOurOpenCVPipeline extends OpenCvPipeline {
         }
 
         // IPC
-        GolfBotIPCVariables.ballExists = foundBall;
+        AutonIPCVariables.ballExists = foundBall;
 
         if (foundBall) {
-            GolfBotIPCVariables.ballX = centers[largest_contour_index].x - (input.width() / 2.0);
-            GolfBotIPCVariables.ballY = centers[largest_contour_index].y - (input.height() / 2.0);
+            AutonIPCVariables.ballX = centers[largest_contour_index].x - (input.width() / 2.0);
+            AutonIPCVariables.ballY = centers[largest_contour_index].y - (input.height() / 2.0);
         }
 
         /*

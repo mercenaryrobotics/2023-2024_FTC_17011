@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -31,6 +32,7 @@ import java.util.Locale;
 
 
 @Autonomous (name="New Comp Blue Auton", group="Robot")
+@Disabled
 public class new_blue_auton extends LinearOpMode {
     private DcMotorEx frontLeftDrive = null;
     private DcMotorEx frontRightDrive = null;
@@ -73,14 +75,14 @@ public class new_blue_auton extends LinearOpMode {
     private RunState state = RunState.POST_INIT;
 
     private void aprilTagDetection() {
-        if (GolfBotIPCVariables.ballX < 300 && GolfBotIPCVariables.ballX > 50) {
+        if (AutonIPCVariables.ballX < 300 && AutonIPCVariables.ballX > 50) {
             aprilTagValue = 2;
-        } else if (GolfBotIPCVariables.ballX > -167 && GolfBotIPCVariables.ballX < -112) {
+        } else if (AutonIPCVariables.ballX > -167 && AutonIPCVariables.ballX < -112) {
             aprilTagValue = 1;
         } else {
             aprilTagValue = 3;
         }
-        telemetry.addData("x value", GolfBotIPCVariables.ballX);
+        telemetry.addData("x value", AutonIPCVariables.ballX);
         telemetry.addData("aprilTag value", aprilTagValue);
     }
 
@@ -276,22 +278,24 @@ class BlueOpenCVPipeline extends OpenCvPipeline {
     }
 
     /**
-     * Get largest contour area in list of OpenCV contours
+     * Get largest contour in list of OpenCV contours
      * @param contours contours to search
-     * @return contour area
+     * @return contour
      */
-    private double getLargestContourArea(List<MatOfPoint> contours) {
+    private MatOfPoint2f getLargestContour(List<MatOfPoint> contours) {
         // Now search the list for the new largest "blob"
         double largest_area = 0.0;
+        MatOfPoint2f largest_contour = null;
 
         for (int i = 0; i < contours.size(); i++) {// iterate through each contour.
             double area = Imgproc.contourArea(contours.get(i),false); // Find the area of contour
             if ((area > largest_area) && (area > BlueAutonConstants.minBallArea)) {
-                largest_area=area;
+                largest_area = area;
+                largest_contour = new MatOfPoint2f(contours.get(i));
             }
         }
 
-        return largest_area;
+        return largest_contour;
     }
 
     /**
@@ -396,7 +400,8 @@ class BlueOpenCVPipeline extends OpenCvPipeline {
 
         // Get largest contour (hopefully ball)
         int largest_contour_index = getLargestContourIndex(contours);
-        GolfBotIPCVariables.foundBallArea = getLargestContourArea(contours);
+        AutonIPCVariables.foundBallArea = Imgproc.contourArea(getLargestContour(contours));
+        AutonIPCVariables.foundBallPerimeter = Imgproc.arcLength(getLargestContour(contours), true);
         boolean foundBall = largest_contour_index > -1;
 
         // Find the contours and bounding regions
@@ -422,11 +427,11 @@ class BlueOpenCVPipeline extends OpenCvPipeline {
         }
 
         // IPC
-        GolfBotIPCVariables.ballExists = foundBall;
+        AutonIPCVariables.ballExists = foundBall;
 
         if (foundBall) {
-            GolfBotIPCVariables.ballX = centers[largest_contour_index].x - (input.width() / 2.0);
-            GolfBotIPCVariables.ballY = centers[largest_contour_index].y - (input.height() / 2.0);
+            AutonIPCVariables.ballX = centers[largest_contour_index].x - (input.width() / 2.0);
+            AutonIPCVariables.ballY = centers[largest_contour_index].y - (input.height() / 2.0);
         }
 
         /*
