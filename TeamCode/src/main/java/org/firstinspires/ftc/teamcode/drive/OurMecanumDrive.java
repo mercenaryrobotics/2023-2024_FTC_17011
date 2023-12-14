@@ -33,12 +33,14 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
@@ -99,10 +101,10 @@ public class OurMecanumDrive extends MecanumDrive {
                 DriveConstants.LOGO_FACING_DIR, DriveConstants.USB_FACING_DIR));
         imu.initialize(parameters);
 
-        leftFront = hardwareMap.get(DcMotorEx.class, "LF");
-        leftRear = hardwareMap.get(DcMotorEx.class, "LB");
-        rightRear = hardwareMap.get(DcMotorEx.class, "RB");
-        rightFront = hardwareMap.get(DcMotorEx.class, "RF");
+        leftFront = hardwareMap.get(DcMotorEx.class, "FL");
+        leftRear = hardwareMap.get(DcMotorEx.class, "BL");
+        rightRear = hardwareMap.get(DcMotorEx.class, "BR");
+        rightFront = hardwareMap.get(DcMotorEx.class, "FR");
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -282,9 +284,9 @@ public class OurMecanumDrive extends MecanumDrive {
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
-        leftFront.setPower(v);
-        leftRear.setPower(v1);
-        rightRear.setPower(v2);
+        leftFront.setPower(-v);
+        leftRear.setPower(-v1);
+        rightRear.setPower(-v2);
         rightFront.setPower(v3);
     }
 
