@@ -218,10 +218,10 @@ public class hello extends LinearOpMode {
         // This ensures all the powers maintain the same ratio,
         // but only if at least one is out of the range [-1, 1]
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double frontLeftPower = -(y - rx + x) / denominator; //A-RC has negative before parentheses and B-RC has no negative
-        double backLeftPower = -(y + rx + x) / denominator;
-        double frontRightPower = (y + rx - x) / denominator;
-        double backRightPower = -(y - rx - x) / denominator;
+        double frontLeftPower = -(y - x + rx) / denominator; //A-RC has negative before parentheses and B-RC has no negative
+        double backLeftPower = -(y + x + rx) / denominator;
+        double frontRightPower = (y + x - rx) / denominator;
+        double backRightPower = -(y - x - rx) / denominator;
 
         frontLeftDrive.setPower(frontLeftPower * speed_multiplier);
         backLeftDrive.setPower(backLeftPower * speed_multiplier);
@@ -266,8 +266,8 @@ public class hello extends LinearOpMode {
     private void climberFunctions() {
         /* actual controls for comp climb */
         if (gamepad1.dpad_up){
-            climberMotorLeft.setTargetPosition(-1000);
-            climberMotorRight.setTargetPosition(1000);
+            climberMotorLeft.setTargetPosition(4000);
+            climberMotorRight.setTargetPosition(4000);
         }
         else if (gamepad1.dpad_down){
             climberMotorLeft.setTargetPosition(0);
@@ -275,7 +275,7 @@ public class hello extends LinearOpMode {
         }
         if (gamepad1.dpad_left) {
             climberHookLeft.setPosition(0);
-            climberHookRight.setPosition(0);
+            climberHookRight.setPosition(0.13);
         }
         else if (gamepad1.dpad_right){
             climberHookLeft.setPosition(0.4);
@@ -435,7 +435,7 @@ public class hello extends LinearOpMode {
             joystickMecanumDrive();
             //fieldCentricDrive();
 
-            //climberFunctions();
+            climberFunctions();
             armFunctions();
             slowServoLoop(); // for slow wrist control
 
