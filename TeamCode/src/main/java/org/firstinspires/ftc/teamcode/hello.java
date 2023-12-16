@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 //@Disabled
 public class hello extends LinearOpMode {
     private static final double NORMAL_SPEED = 0.95;
-    private static final double SLOW_SPEED = 0.60;
+    private static final double SLOW_SPEED = 0.45;
 
     private IMU imu = null; // Control/Expansion Hub IMU
 
@@ -63,11 +63,11 @@ public class hello extends LinearOpMode {
         Idle,
         PickUpInitial,
         PickUpTransfer,
-        ScoreLow,
-        ScoreMid,
-        ScoreHigh,
-        ScoreDefault,
-        ScoreDefaultOuttake
+        ScoreL1,
+        ScoreL2,
+        ScoreL3,
+        ScoreL4,
+        ScoreOuttake
     }
 
     public robotState currentState = robotState.Idle;
@@ -100,7 +100,8 @@ public class hello extends LinearOpMode {
         pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         pivot.setDirection(DcMotorSimple.Direction.REVERSE);
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        pivot.setTargetPosition(0);
+        pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Lift
         lift = hardwareMap.get(DcMotorEx.class, "lift");
@@ -145,7 +146,7 @@ public class hello extends LinearOpMode {
         climberMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         climberMotorRight.setPower(1);
 
-        pivot.setPower(0.3);
+        pivot.setPower(0.6);
 
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setTargetPosition(0);
@@ -217,10 +218,10 @@ public class hello extends LinearOpMode {
         // This ensures all the powers maintain the same ratio,
         // but only if at least one is out of the range [-1, 1]
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double frontLeftPower = -(y + rx + x) / denominator; //A-RC has negative before parentheses and B-RC has no negative
-        double backLeftPower = -(y - rx + x) / denominator;
-        double frontRightPower = (y - rx - x) / denominator;
-        double backRightPower = -(y + rx - x) / denominator;
+        double frontLeftPower = -(y - rx + x) / denominator; //A-RC has negative before parentheses and B-RC has no negative
+        double backLeftPower = -(y + rx + x) / denominator;
+        double frontRightPower = (y + rx - x) / denominator;
+        double backRightPower = -(y - rx - x) / denominator;
 
         frontLeftDrive.setPower(frontLeftPower * speed_multiplier);
         backLeftDrive.setPower(backLeftPower * speed_multiplier);
@@ -263,36 +264,25 @@ public class hello extends LinearOpMode {
     }
 
     private void climberFunctions() {
-        /* only for the manual controls */
-        if (gamepad1.dpad_up) {
-            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() +- 20);
-            climberMotorRight.setTargetPosition(climberMotorRight.getTargetPosition() + 20);
-        }
-        else if (gamepad1.dpad_down){
-            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() + 20);
-            climberMotorRight.setTargetPosition(climberMotorRight.getTargetPosition() - 20);
-        }
-
         /* actual controls for comp climb */
-        if (gamepad2.dpad_up){
+        if (gamepad1.dpad_up){
             climberMotorLeft.setTargetPosition(-1000);
             climberMotorRight.setTargetPosition(1000);
         }
-        else if (gamepad2.dpad_down){
+        else if (gamepad1.dpad_down){
             climberMotorLeft.setTargetPosition(0);
             climberMotorRight.setTargetPosition(0);
         }
-        if (gamepad2.dpad_left) {
+        if (gamepad1.dpad_left) {
             climberHookLeft.setPosition(0);
             climberHookRight.setPosition(0);
         }
-        else if (gamepad2.dpad_right){
+        else if (gamepad1.dpad_right){
             climberHookLeft.setPosition(0.4);
             climberHookRight.setPosition(0.42);
         }
         telemetry.addData("climberMotorLeft", climberMotorLeft.getCurrentPosition());
         telemetry.addData("climberMotorRight", climberMotorRight.getCurrentPosition());
-
     }
 
 
@@ -305,21 +295,26 @@ public class hello extends LinearOpMode {
             currentState = robotState.PickUpInitial;
         }
         else if (gamepad2.a){
-            if (currentState == robotState.ScoreDefault){
-                currentState = robotState.ScoreDefaultOuttake;
+            if (currentState == robotState.ScoreL1){
+                currentState = robotState.ScoreOuttake;
             } else {
-                currentState = robotState.ScoreDefault;
+                currentState = robotState.ScoreL1;
                 sleep(500);
             }
         }
         else if (gamepad2.b){
-            currentState = robotState.ScoreLow;
+            if (currentState == robotState.ScoreL2){
+                currentState = robotState.ScoreOuttake;
+            } else {
+                currentState = robotState.ScoreL2;
+                sleep(500);
+            }
         }
         else if (gamepad2.x){
-            currentState = robotState.ScoreMid;
+            currentState = robotState.ScoreL3;
         }
         else if (gamepad2.y){
-            currentState = robotState.ScoreHigh;
+            currentState = robotState.ScoreL4;
         }
         else if (gamepad2.back) {
             currentState = robotState.Idle;
@@ -327,8 +322,8 @@ public class hello extends LinearOpMode {
             outtakeRight.setPosition(0.32);
             outtakeLeft.setPosition(0.32);
             lift.setTargetPosition(0);
+            pivot.setTargetPosition(0);
             moveOuttakeWrist(0, SlowServoState.SLOW_MOVING);
-            sleep(100);
         }
 
         switch (currentState) {
@@ -355,25 +350,29 @@ public class hello extends LinearOpMode {
                     intakeRight.setPower(0);
                 }
                 break;
-            case ScoreDefault:
-                lift.setTargetPosition(1192);
-                pivot.setTargetPosition(0);
+            case ScoreL1:
+                lift.setTargetPosition(719);
+                pivot.setTargetPosition(-45);
                 moveOuttakeWrist(0.4, SlowServoState.DEFAULT);
                 break;
-            case ScoreDefaultOuttake:
+            case ScoreL2:
+                lift.setTargetPosition(719);
+                pivot.setTargetPosition(-106);
+                moveOuttakeWrist(0.44, SlowServoState.DEFAULT);
+                // moveOuttakeWrist(gamepad2.right_trigger, SlowServoState.DEFAULT);
+                break;
+            case ScoreL3:
+                lift.setTargetPosition(729);
+                pivot.setTargetPosition(-106);
+                moveOuttakeWrist(0.44, SlowServoState.DEFAULT);
+                // moveOuttakeWrist(gamepad2.right_trigger, SlowServoState.DEFAULT);
+                break;
+            case ScoreL4:
+                break;
+            case ScoreOuttake:
                 outtakeRight.setPosition(0.05);
                 outtakeLeft.setPosition(0.05);
                 break;
-            case ScoreHigh:
-                break;
-            case ScoreLow:
-                lift.setTargetPosition(1160);
-                pivot.setTargetPosition(-42);
-                moveOuttakeWrist(0.5, SlowServoState.DEFAULT);
-                break;
-            case ScoreMid:
-                break;
-
         }
 //        if (gamepad1.left_bumper) {
 //            intakeLeft.setPower(1);

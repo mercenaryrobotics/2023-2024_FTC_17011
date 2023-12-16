@@ -39,8 +39,17 @@ public class new_blue_auton extends LinearOpMode {
     private DcMotorEx backLeftDrive = null;
     private DcMotorEx backRightDrive = null;
 
+    private DcMotorEx climberMotorLeft = null;
+    private DcMotorEx climberMotorRight = null;
+
     private DcMotorEx pivot = null;
     private DcMotorEx lift = null;
+
+
+    private Servo climberHookLeft = null;
+    private Servo climberHookRight = null;
+
+    private Servo shooter = null;
 
     private Servo intakeWrist = null;
     private CRServo intakeLeft = null;
@@ -51,7 +60,15 @@ public class new_blue_auton extends LinearOpMode {
 
     private Servo outtakeWrist = null;
     private double intakeWristTarget;
-    private IntakeWristState intakeWristState;
+    private double outtakeWristTarget;
+    private hello.SlowServoState intakeWristState;
+    private hello.SlowServoState outtakeWristState;
+
+    enum SlowServoState {
+        DEFAULT,
+        SLOW_MOVING,
+        SLOW_DONE
+    }
 
     enum IntakeWristState {
         DEFAULT,
@@ -117,33 +134,86 @@ public class new_blue_auton extends LinearOpMode {
             idle();
         }
     }
-    private void initializeMotors() {
+    private void initializeMotors()
+    {
+        // Drive
         frontLeftDrive = hardwareMap.get(DcMotorEx.class, "FL");
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
         backLeftDrive = hardwareMap.get(DcMotorEx.class, "BL");
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
 
-        frontRightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //climberMoter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //climberMoter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        // Pivot
+        pivot = hardwareMap.get(DcMotorEx.class, "pivot");
+        pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        pivot.setDirection(DcMotorSimple.Direction.REVERSE);
+        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        pivot.setTargetPosition(0);
+        pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // Lift
+        lift = hardwareMap.get(DcMotorEx.class, "lift");
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setPower(0.75);
+
+        // Intake
+        intakeLeft = hardwareMap.get(CRServo.class, "leftIntake");
+        intakeRight = hardwareMap.get(CRServo.class, "rightIntake");
+        intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
+
+        moveIntakeWrist(0.05, hello.SlowServoState.DEFAULT);
+
+        //Out-take
+        outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
+        outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
+        outtakeWrist = hardwareMap.get(Servo.class, "outtakeWrist");
+
+        outtakeWrist.setDirection(Servo.Direction.REVERSE);
+
+        outtakeRight.setDirection(Servo.Direction.REVERSE);
+
+        // Climber
+        climberMotorLeft = hardwareMap.get(DcMotorEx.class, "climberMotorLeft");
+        climberMotorRight = hardwareMap.get(DcMotorEx.class, "climberMotorRight");
+        climberHookLeft = hardwareMap.get(Servo.class, "climberHookLeft");
+        climberHookRight = hardwareMap.get(Servo.class, "climberHookRight");
+
+
+        climberHookLeft.setDirection(Servo.Direction.REVERSE);
+        climberMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        climberMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        climberMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        climberMotorLeft.setTargetPosition(0);
+        climberMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        climberMotorLeft.setPower(1);
+
+        climberMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        climberMotorRight.setTargetPosition(0);
+        climberMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        climberMotorRight.setPower(1);
+
+        pivot.setPower(0.6);
+
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setTargetPosition(0);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
     }
-
     private void initializeDashboard() {
         dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
@@ -197,6 +267,41 @@ public class new_blue_auton extends LinearOpMode {
             }
         });
 
+    }
+
+    private void moveIntakeWrist(double position, hello.SlowServoState mode) {
+        intakeWristTarget = position;
+        if (mode == hello.SlowServoState.DEFAULT) {
+            intakeWrist.setPosition(intakeWristTarget);
+        } else {
+            intakeWristState = hello.SlowServoState.SLOW_MOVING;
+        }
+    }
+
+    private void moveOuttakeWrist(double position, hello.SlowServoState mode) {
+        outtakeWristTarget = position;
+        if (mode == hello.SlowServoState.DEFAULT) {
+            outtakeWrist.setPosition(outtakeWristTarget);
+        } else {
+            outtakeWristState = hello.SlowServoState.SLOW_MOVING;
+        }
+    }
+
+    private void slowServoLoop() {
+        if (intakeWristTarget + 0.01 >= intakeWrist.getPosition() && intakeWristTarget - 0.01 <= intakeWrist.getPosition()) {
+            intakeWristState = hello.SlowServoState.SLOW_DONE;
+        }
+        else if (intakeWristState == hello.SlowServoState.SLOW_MOVING) {
+            intakeWrist.setPosition(intakeWrist.getPosition() + ((intakeWristTarget - intakeWrist.getPosition()) / 45));
+        }
+
+        if (outtakeWristTarget + 0.01 >= outtakeWrist.getPosition() && outtakeWristTarget - 0.01 <= outtakeWrist.getPosition()) {
+            outtakeWristState = hello.SlowServoState.SLOW_DONE;
+        }
+        else if (outtakeWristState == hello.SlowServoState.SLOW_MOVING) {
+            outtakeWrist.setPosition(outtakeWrist.getPosition() + ((outtakeWristTarget - outtakeWrist.getPosition()) / 45));
+        }
+        telemetry.addData("outtakePos", outtakeWrist.getPosition());
     }
 
     @Override
