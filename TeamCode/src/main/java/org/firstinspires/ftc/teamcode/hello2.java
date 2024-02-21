@@ -25,6 +25,7 @@ public class hello2 extends LinearOpMode {
     private DcMotorEx frontLeftDrive = null;
     private DcMotorEx frontRightDrive = null;
     private DcMotorEx backLeftDrive = null;
+    private Servo intakewrist = null;
     private DcMotorEx backRightDrive = null;
 
 
@@ -43,6 +44,8 @@ public class hello2 extends LinearOpMode {
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        intakewrist = hardwareMap.get(Servo.class, "intakewrist");
 
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -67,7 +70,9 @@ public class hello2 extends LinearOpMode {
         double y = 0;
         double x = 0;
         double rx = 0;
-
+        if (gamepad1.a) {
+            intakewrist.setPosition(0);
+        }
         if (!gamepad1.right_bumper) {
              y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
              x = gamepad1.left_stick_x;
