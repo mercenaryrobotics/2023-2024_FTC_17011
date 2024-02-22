@@ -26,8 +26,31 @@ public class hello2 extends LinearOpMode {
     private DcMotorEx frontRightDrive = null;
     private DcMotorEx backLeftDrive = null;
     private Servo intakewrist = null;
+    private CRServo intakeLeft = null;
+    private CRServo intakeRight = null;
+    private Servo climberHookLeft = null;
+    private Servo climberHookRight = null;
+    private SlowServoState intakeWristState = SlowServoState.SLOW_DONE;
+    private double intakeWristTarget;
+
     private DcMotorEx backRightDrive = null;
 
+    enum SlowServoState {
+        DEFAULT,
+        SLOW_MOVING,
+        SLOW_DONE
+    }
+    enum robotState {
+        Idle,
+        PickUpInitial,
+        PickUpTransfer,
+        ScoreL1,
+        ScoreL2,
+        ScoreL3,
+        ScoreL4,
+        ScoreOuttake
+    }
+    public robotState currentState = robotState.Idle;
 
     private void initializeMotors()
     {
@@ -46,11 +69,19 @@ public class hello2 extends LinearOpMode {
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         intakewrist = hardwareMap.get(Servo.class, "intakewrist");
+        moveIntakeWrist(0.02, SlowServoState.DEFAULT);
+        intakeLeft = hardwareMap.get(CRServo.class, "intakeLeft");
+        intakeRight = hardwareMap.get(CRServo.class, "intakeRight");
 
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        climberHookLeft = hardwareMap.get(Servo.class, "climberHookLeft");
+        climberHookRight = hardwareMap.get(Servo.class, "climberHookRight");
+        climberHookRight.setDirection(Servo.Direction.REVERSE);
+
 
     }
 
@@ -64,15 +95,95 @@ public class hello2 extends LinearOpMode {
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientationOnRobot));
     }
+    private void intakeMovement() {
+        if (gamepad1.a) {
+            intakewrist.setPosition(0);
+        }
+        switch (currentState) {
+            case Idle:
+                // Not implemented
+                break;
+            case PickUpInitial:
+                moveIntakeWrist(0.02, SlowServoState.SLOW_MOVING);
+                if (gamepad2.left_bumper) {
+                    intakeLeft.setPower(1);
+                    intakeRight.setPower(1);
+                } else {
+                    intakeLeft.setPower(0);
+                    intakeRight.setPower(0);
+                }
+                break;
+            case PickUpTransfer:
+                moveIntakeWrist(0.725, SlowServoState.SLOW_MOVING);
+                if (gamepad2.right_bumper) {
+                    intakeLeft.setPower(-1);
+                    intakeRight.setPower(-1);
+                } else {
+                    intakeLeft.setPower(0);
+                    intakeRight.setPower(0);
+                }
+                break;
+        }
+        if (gamepad2.right_bumper){
+            currentState = robotState.PickUpTransfer;
+        }
+        else if (gamepad2.left_bumper){
+            currentState = robotState.PickUpInitial;
+        }
+
+    }
+    private void moveIntakeWrist(double position, SlowServoState mode) {
+        intakeWristTarget = position;
+        if (mode == SlowServoState.DEFAULT) {
+            intakewrist.setPosition(intakeWristTarget);
+        } else {
+            intakeWristState = SlowServoState.SLOW_MOVING;
+        }
+    }
+    private void slowServoLoop() {
+        telemetry.addData("test", intakeWristState.toString());
+        if (intakeWristTarget + 0.01 >= intakewrist.getPosition() && intakeWristTarget - 0.01 <= intakewrist.getPosition()) {
+            intakeWristState = SlowServoState.SLOW_DONE;
+        }
+        else if (intakeWristState == SlowServoState.SLOW_MOVING) {
+            intakewrist.setPosition(intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 500));
+            telemetry.addData("uhhhh", intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 500));
+        }
+
+//        if (outtakeWristTarget + 0.01 >= outtakeWrist.getPosition() && outtakeWristTarget - 0.01 <= outtakeWrist.getPosition()) {
+//            outtakeWristState = hello.SlowServoState.SLOW_DONE;
+//        }
+//        else if (outtakeWristState == hello.SlowServoState.SLOW_MOVING) {
+//            outtakeWrist.setPosition(outtakeWrist.getPosition() + ((outtakeWristTarget - outtakeWrist.getPosition()) / 45));
+        }
+    private void climberFunctions() {
+        /* actual controls for comp climb */
+//        if (gamepad1.dpad_up){
+//            climberMotorLeft.setTargetPosition(4000);
+//            climberMotorRight.setTargetPosition(4000);
+//        }
+//        else if (gamepad1.dpad_down){
+//            climberMotorLeft.setTargetPosition(0);
+//            climberMotorRight.setTargetPosition(0);
+//        }
+        if (gamepad1.dpad_left) {
+            climberHookLeft.setPosition(0.02);
+            climberHookRight.setPosition(0.055);
+        }
+        else if (gamepad1.dpad_right) {
+                climberHookLeft.setPosition(0.52);
+                climberHookRight.setPosition(0.57);
+            }
+//        telemetry.addData("climberMotorLeft", climberMotorLeft.getCurrentPosition());
+//        telemetry.addData("climberMotorRight", climberMotorRight.getCurrentPosition());
+        }
 
     private void joystickMecanumDrive() {
 
         double y = 0;
         double x = 0;
         double rx = 0;
-        if (gamepad1.a) {
-            intakewrist.setPosition(0);
-        }
+
         if (!gamepad1.right_bumper) {
              y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
              x = gamepad1.left_stick_x;
@@ -116,7 +227,9 @@ public class hello2 extends LinearOpMode {
         while (opModeIsActive()) {
             joystickMecanumDrive();
             //fieldCentricDrive();
-
+            intakeMovement();
+            climberFunctions();
+            slowServoLoop();
             updateTelemetry(telemetry);
         }
     }
