@@ -19,30 +19,39 @@ public class hello2 extends LinearOpMode {
 
     private IMU imu = null; // Control/Expansion Hub IMU
 
-    //Motor demo variables
+    // Drive
     private DcMotorEx frontLeftDrive = null;
     private DcMotorEx frontRightDrive = null;
     private DcMotorEx backLeftDrive = null;
+    private DcMotorEx backRightDrive = null;
+
+    // Intake
     private Servo intakewrist = null;
     private CRServo intakeLeft = null;
-//    private DcMotorEx pivot = null;
-//    private DcMotorEx lift = null;
     private CRServo intakeRight = null;
-//    private Servo outtakeLeft = null;
-//    private Servo outtakeRight = null;
-//
-//    private Servo outtakeWrist = null;
-//    private double outtakeWristTarget;
 
+    // Arm
+    //private DcMotorEx pivot = null;
+    //private DcMotorEx lift = null;
+
+    // Outtake
+    //private Servo outtakeLeft = null;
+    //private Servo outtakeRight = null;
+    //
+    //private Servo outtakeWrist = null;
+    //private double outtakeWristTarget;
+
+    // Climber
     private DcMotorEx climberMotorLeft = null;
     private DcMotorEx climberMotorRight = null;
     private Servo climberHookLeft = null;
     private Servo climberHookRight = null;
+
+    //Servo states
     private SlowServoState intakeWristState = SlowServoState.SLOW_DONE;
     private SlowServoState outtakeWristState = SlowServoState.SLOW_DONE;
     private double intakeWristTarget;
-
-    private DcMotorEx backRightDrive = null;
+    private double outtakeWristTarget;
 
     enum SlowServoState {
         DEFAULT,
@@ -69,7 +78,6 @@ public class hello2 extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
         backLeftDrive = hardwareMap.get(DcMotorEx.class, "BL");
         backRightDrive = hardwareMap.get(DcMotorEx.class, "BR");
-
         frontRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -78,25 +86,25 @@ public class hello2 extends LinearOpMode {
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        intakewrist = hardwareMap.get(Servo.class, "intakewrist");
-//        outtakeWrist = hardwareMap.get(Servo.class, "outtakeWrist");
-//        outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
-//        outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
-        moveIntakeWrist(0.03, SlowServoState.DEFAULT);
-        intakeLeft = hardwareMap.get(CRServo.class, "intakeLeft");
-        intakeRight = hardwareMap.get(CRServo.class, "intakeRight");
-
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // Intake
+        intakewrist = hardwareMap.get(Servo.class, "intakewrist");
+        intakeLeft = hardwareMap.get(CRServo.class, "intakeLeft");
+        intakeRight = hardwareMap.get(CRServo.class, "intakeRight");
+        moveIntakeWrist(0.03, SlowServoState.DEFAULT);
+
+        // Outtake
+        //outtakeWrist = hardwareMap.get(Servo.class, "outtakeWrist");
+        //outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
+        //outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
+
+        // Climber
         climberMotorLeft = hardwareMap.get(DcMotorEx.class, "climberMotorLeft");
         climberMotorRight = hardwareMap.get(DcMotorEx.class, "climberMotorRight");
-
-        climberHookLeft = hardwareMap.get(Servo.class, "climberHookLeft");
-        climberHookRight = hardwareMap.get(Servo.class, "climberHookRight");
-        climberHookRight.setDirection(Servo.Direction.REVERSE);
 
         climberMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         climberMotorLeft.setTargetPosition(0);
@@ -111,13 +119,15 @@ public class hello2 extends LinearOpMode {
         climberMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         climberMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        climberHookLeft = hardwareMap.get(Servo.class, "climberHookLeft");
+        climberHookRight = hardwareMap.get(Servo.class, "climberHookRight");
+        climberHookRight.setDirection(Servo.Direction.REVERSE);
+
         // Lift
-//        lift = hardwareMap.get(DcMotorEx.class, "lift");
-//        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        lift.setPower(0);
-
-
+        //lift = hardwareMap.get(DcMotorEx.class, "lift");
+        //lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //lift.setPower(0);
     }
 
     private void initializeImu() {
