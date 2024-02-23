@@ -10,8 +10,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
 @TeleOp (name = "NewCompCode" ,group = "Linear Opmode")
 
 //@Disabled
@@ -27,10 +25,21 @@ public class hello2 extends LinearOpMode {
     private DcMotorEx backLeftDrive = null;
     private Servo intakewrist = null;
     private CRServo intakeLeft = null;
+//    private DcMotorEx pivot = null;
+//    private DcMotorEx lift = null;
     private CRServo intakeRight = null;
+//    private Servo outtakeLeft = null;
+//    private Servo outtakeRight = null;
+//
+//    private Servo outtakeWrist = null;
+//    private double outtakeWristTarget;
+
+    private DcMotorEx climberMotorLeft = null;
+    private DcMotorEx climberMotorRight = null;
     private Servo climberHookLeft = null;
     private Servo climberHookRight = null;
     private SlowServoState intakeWristState = SlowServoState.SLOW_DONE;
+    private SlowServoState outtakeWristState = SlowServoState.SLOW_DONE;
     private double intakeWristTarget;
 
     private DcMotorEx backRightDrive = null;
@@ -40,6 +49,7 @@ public class hello2 extends LinearOpMode {
         SLOW_MOVING,
         SLOW_DONE
     }
+
     enum robotState {
         Idle,
         PickUpInitial,
@@ -50,10 +60,10 @@ public class hello2 extends LinearOpMode {
         ScoreL4,
         ScoreOuttake
     }
+
     public robotState currentState = robotState.Idle;
 
-    private void initializeMotors()
-    {
+    private void initializeMotors() {
         // Drive
         frontLeftDrive = hardwareMap.get(DcMotorEx.class, "FL");
         frontRightDrive = hardwareMap.get(DcMotorEx.class, "FR");
@@ -69,7 +79,10 @@ public class hello2 extends LinearOpMode {
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         intakewrist = hardwareMap.get(Servo.class, "intakewrist");
-        moveIntakeWrist(0.02, SlowServoState.DEFAULT);
+//        outtakeWrist = hardwareMap.get(Servo.class, "outtakeWrist");
+//        outtakeLeft = hardwareMap.get(Servo.class, "outtakeLeft");
+//        outtakeRight = hardwareMap.get(Servo.class, "outtakeRight");
+        moveIntakeWrist(0.03, SlowServoState.DEFAULT);
         intakeLeft = hardwareMap.get(CRServo.class, "intakeLeft");
         intakeRight = hardwareMap.get(CRServo.class, "intakeRight");
 
@@ -78,16 +91,38 @@ public class hello2 extends LinearOpMode {
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        climberMotorLeft = hardwareMap.get(DcMotorEx.class, "climberMotorLeft");
+        climberMotorRight = hardwareMap.get(DcMotorEx.class, "climberMotorRight");
+
         climberHookLeft = hardwareMap.get(Servo.class, "climberHookLeft");
         climberHookRight = hardwareMap.get(Servo.class, "climberHookRight");
         climberHookRight.setDirection(Servo.Direction.REVERSE);
+
+        climberMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        climberMotorLeft.setTargetPosition(0);
+        climberMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        climberMotorLeft.setPower(0.2);
+
+        climberMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        climberMotorRight.setTargetPosition(0);
+        climberMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        climberMotorRight.setPower(0.7);
+
+        climberMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        climberMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Lift
+//        lift = hardwareMap.get(DcMotorEx.class, "lift");
+//        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        lift.setPower(0);
 
 
     }
 
     private void initializeImu() {
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
@@ -95,43 +130,95 @@ public class hello2 extends LinearOpMode {
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientationOnRobot));
     }
-    private void intakeMovement() {
-        if (gamepad1.a) {
-            intakewrist.setPosition(0);
-        }
-        switch (currentState) {
-            case Idle:
-                // Not implemented
-                break;
-            case PickUpInitial:
-                moveIntakeWrist(0.02, SlowServoState.SLOW_MOVING);
-                if (gamepad2.left_bumper) {
-                    intakeLeft.setPower(1);
-                    intakeRight.setPower(1);
-                } else {
-                    intakeLeft.setPower(0);
-                    intakeRight.setPower(0);
-                }
-                break;
-            case PickUpTransfer:
-                moveIntakeWrist(0.725, SlowServoState.SLOW_MOVING);
-                if (gamepad2.right_bumper) {
-                    intakeLeft.setPower(-1);
-                    intakeRight.setPower(-1);
-                } else {
-                    intakeLeft.setPower(0);
-                    intakeRight.setPower(0);
-                }
-                break;
-        }
-        if (gamepad2.right_bumper){
-            currentState = robotState.PickUpTransfer;
-        }
-        else if (gamepad2.left_bumper){
-            currentState = robotState.PickUpInitial;
-        }
 
-    }
+//    private void armFunctions() {
+//
+//        if (gamepad2.right_bumper) {
+//            currentState = robotState.PickUpTransfer;
+//        } else if (gamepad2.left_bumper) {
+//            currentState = robotState.PickUpInitial;
+//        } else if (gamepad2.a) {
+//            if (currentState == robotState.ScoreL1) {
+//                currentState = robotState.ScoreOuttake;
+//            } else {
+//                currentState = robotState.ScoreL1;
+//                sleep(500);
+//            }
+//        } else if (gamepad2.b) {
+//            if (currentState == robotState.ScoreL2) {
+//                currentState = robotState.ScoreOuttake;
+//            } else {
+//                currentState = robotState.ScoreL2;
+//                sleep(500);
+//            }
+//        } else if (gamepad2.x) {
+//            currentState = robotState.ScoreL3;
+//        } else if (gamepad2.y) {
+//            currentState = robotState.ScoreL4;
+//        } else if (gamepad2.back) {
+//            currentState = robotState.Idle;
+//            moveIntakeWrist(0.05, SlowServoState.SLOW_MOVING);
+//            outtakeRight.setPosition(0.32);
+//            outtakeLeft.setPosition(0.32);
+//            lift.setTargetPosition(0);
+//            pivot.setTargetPosition(0);
+//            moveOuttakeWrist(0, SlowServoState.SLOW_MOVING);
+//        }
+//        switch (currentState) {
+//            case Idle:
+//                // Not implemented
+//                break;
+//            case PickUpInitial:
+//                moveIntakeWrist(0.03, SlowServoState.SLOW_MOVING);
+//                if (gamepad1.left_bumper) {
+//                    intakeLeft.setPower(1);
+//                    intakeRight.setPower(1);
+//                } else {
+//                    intakeLeft.setPower(0);
+//                    intakeRight.setPower(0);
+//                }
+//                break;
+//            case PickUpTransfer:
+//                moveIntakeWrist(0.7, SlowServoState.DEFAULT);
+//                if (gamepad1.right_bumper) {
+//                    intakeLeft.setPower(-1);
+//                    intakeRight.setPower(-1);
+//                } else {
+//                    intakeLeft.setPower(0);
+//                    intakeRight.setPower(0);
+//                }
+//                break;
+//            case ScoreL1:
+//                lift.setTargetPosition(719);
+//                pivot.setTargetPosition(-45);
+//                moveOuttakeWrist(0.4, SlowServoState.DEFAULT);
+//                break;
+//            case ScoreL2:
+//                lift.setTargetPosition(719);
+//                pivot.setTargetPosition(-106);
+//                moveOuttakeWrist(0.44, SlowServoState.DEFAULT);
+//                // moveOuttakeWrist(gamepad2.right_trigger, SlowServoState.DEFAULT);
+//                break;
+//            case ScoreL3:
+//                lift.setTargetPosition(729);
+//                pivot.setTargetPosition(-106);
+//                moveOuttakeWrist(0.44, SlowServoState.DEFAULT);
+//                // moveOuttakeWrist(gamepad2.right_trigger, SlowServoState.DEFAULT);
+//                break;
+//            case ScoreL4:
+//                break;
+//            case ScoreOuttake:
+//                outtakeRight.setPosition(0.05);
+//                outtakeLeft.setPosition(0.05);
+//                break;
+//            }
+//
+//            if (gamepad1.right_bumper) {
+//                currentState = robotState.PickUpTransfer;
+//            } else if (gamepad1.left_bumper) {
+//                currentState = robotState.PickUpInitial;
+//            }
+//        }
     private void moveIntakeWrist(double position, SlowServoState mode) {
         intakeWristTarget = position;
         if (mode == SlowServoState.DEFAULT) {
@@ -140,42 +227,61 @@ public class hello2 extends LinearOpMode {
             intakeWristState = SlowServoState.SLOW_MOVING;
         }
     }
+//    private void moveOuttakeWrist(double position, SlowServoState mode) {
+//        outtakeWristTarget = position;
+//        if (mode == SlowServoState.DEFAULT) {
+//            outtakeWrist.setPosition(outtakeWristTarget);
+//        } else {
+//            outtakeWristState = SlowServoState.SLOW_MOVING;
+//        }
+//    }
     private void slowServoLoop() {
         telemetry.addData("test", intakeWristState.toString());
         if (intakeWristTarget + 0.01 >= intakewrist.getPosition() && intakeWristTarget - 0.01 <= intakewrist.getPosition()) {
             intakeWristState = SlowServoState.SLOW_DONE;
         }
         else if (intakeWristState == SlowServoState.SLOW_MOVING) {
-            intakewrist.setPosition(intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 500));
-            telemetry.addData("uhhhh", intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 500));
+            intakewrist.setPosition(intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 200));
+            telemetry.addData("uhhhh", intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 200));
         }
-
+//
 //        if (outtakeWristTarget + 0.01 >= outtakeWrist.getPosition() && outtakeWristTarget - 0.01 <= outtakeWrist.getPosition()) {
-//            outtakeWristState = hello.SlowServoState.SLOW_DONE;
+//            outtakeWristState = SlowServoState.SLOW_DONE;
 //        }
-//        else if (outtakeWristState == hello.SlowServoState.SLOW_MOVING) {
+//        else if (outtakeWristState == SlowServoState.SLOW_MOVING) {
 //            outtakeWrist.setPosition(outtakeWrist.getPosition() + ((outtakeWristTarget - outtakeWrist.getPosition()) / 45));
-        }
+//        }
+   }
     private void climberFunctions() {
         /* actual controls for comp climb */
-//        if (gamepad1.dpad_up){
-//            climberMotorLeft.setTargetPosition(4000);
-//            climberMotorRight.setTargetPosition(4000);
-//        }
-//        else if (gamepad1.dpad_down){
-//            climberMotorLeft.setTargetPosition(0);
-//            climberMotorRight.setTargetPosition(0);
-//        }
+        if (gamepad1.dpad_up) {
+            climberMotorLeft.setTargetPosition(3000);
+            climberMotorRight.setTargetPosition(3000);
+        }
+        else if (gamepad1.dpad_down) {
+            climberMotorLeft.setTargetPosition(0);
+            climberMotorRight.setTargetPosition(0);
+        }
         if (gamepad1.dpad_left) {
             climberHookLeft.setPosition(0.02);
             climberHookRight.setPosition(0.055);
+        } else if (gamepad1.dpad_right) {
+            climberHookLeft.setPosition(0.5);
+            climberHookRight.setPosition(0.55);
         }
-        else if (gamepad1.dpad_right) {
-                climberHookLeft.setPosition(0.52);
-                climberHookRight.setPosition(0.57);
-            }
-//        telemetry.addData("climberMotorLeft", climberMotorLeft.getCurrentPosition());
-//        telemetry.addData("climberMotorRight", climberMotorRight.getCurrentPosition());
+//        if (gamepad2.dpad_up) {
+//            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() + 1);
+//        } else if (gamepad2.dpad_down) {
+//            climberMotorLeft.setTargetPosition(climberMotorLeft.getTargetPosition() - 1);
+//        }
+//
+//        if (gamepad2.dpad_left) {
+//            climberMotorRight.setTargetPosition(climberMotorRight.getTargetPosition() + 1);
+//        } else if (gamepad2.dpad_right) {
+//            climberMotorRight.setTargetPosition(climberMotorRight.getTargetPosition() - 1);
+//        }
+        telemetry.addData("climberMotorLeft", climberMotorLeft.getCurrentPosition());
+        telemetry.addData("climberMotorRight", climberMotorRight.getCurrentPosition());
         }
 
     private void joystickMecanumDrive() {
@@ -227,7 +333,7 @@ public class hello2 extends LinearOpMode {
         while (opModeIsActive()) {
             joystickMecanumDrive();
             //fieldCentricDrive();
-            intakeMovement();
+//            armFunctions();
             climberFunctions();
             slowServoLoop();
             updateTelemetry(telemetry);
