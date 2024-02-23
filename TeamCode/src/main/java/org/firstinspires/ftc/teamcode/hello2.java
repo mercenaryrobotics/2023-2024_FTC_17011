@@ -101,12 +101,12 @@ public class hello2 extends LinearOpMode {
         climberMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         climberMotorLeft.setTargetPosition(0);
         climberMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        climberMotorLeft.setPower(0.2);
+        climberMotorLeft.setPower(0.5);
 
         climberMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         climberMotorRight.setTargetPosition(0);
         climberMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        climberMotorRight.setPower(0.7);
+        climberMotorRight.setPower(0.5);
 
         climberMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         climberMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
