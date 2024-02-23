@@ -141,31 +141,31 @@ public class hello2 extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
     }
 
-//    private void armFunctions() {
-//
-//        if (gamepad2.right_bumper) {
-//            currentState = robotState.PickUpTransfer;
-//        } else if (gamepad2.left_bumper) {
-//            currentState = robotState.PickUpInitial;
-//        } else if (gamepad2.a) {
-//            if (currentState == robotState.ScoreL1) {
-//                currentState = robotState.ScoreOuttake;
-//            } else {
-//                currentState = robotState.ScoreL1;
-//                sleep(500);
-//            }
-//        } else if (gamepad2.b) {
-//            if (currentState == robotState.ScoreL2) {
-//                currentState = robotState.ScoreOuttake;
-//            } else {
-//                currentState = robotState.ScoreL2;
-//                sleep(500);
-//            }
-//        } else if (gamepad2.x) {
-//            currentState = robotState.ScoreL3;
-//        } else if (gamepad2.y) {
-//            currentState = robotState.ScoreL4;
-//        } else if (gamepad2.back) {
+    private void armFunctions() {
+
+        if (gamepad2.right_bumper) {
+            currentState = robotState.PickUpTransfer;
+        } else if (gamepad2.left_bumper) {
+            currentState = robotState.PickUpInitial;
+        } else if (gamepad2.a) {
+            if (currentState == robotState.ScoreL1) {
+                currentState = robotState.ScoreOuttake;
+            } else {
+                currentState = robotState.ScoreL1;
+                sleep(500);
+            }
+        } else if (gamepad2.b) {
+            if (currentState == robotState.ScoreL2) {
+                currentState = robotState.ScoreOuttake;
+            } else {
+                currentState = robotState.ScoreL2;
+                sleep(500);
+            }
+        } else if (gamepad2.x) {
+            currentState = robotState.ScoreL3;
+        } else if (gamepad2.y) {
+            currentState = robotState.ScoreL4;
+        }// else if (gamepad2.back) {
 //            currentState = robotState.Idle;
 //            moveIntakeWrist(0.05, SlowServoState.SLOW_MOVING);
 //            outtakeRight.setPosition(0.32);
@@ -174,30 +174,30 @@ public class hello2 extends LinearOpMode {
 //            pivot.setTargetPosition(0);
 //            moveOuttakeWrist(0, SlowServoState.SLOW_MOVING);
 //        }
-//        switch (currentState) {
-//            case Idle:
-//                // Not implemented
-//                break;
-//            case PickUpInitial:
-//                moveIntakeWrist(0.03, SlowServoState.SLOW_MOVING);
-//                if (gamepad1.left_bumper) {
-//                    intakeLeft.setPower(1);
-//                    intakeRight.setPower(1);
-//                } else {
-//                    intakeLeft.setPower(0);
-//                    intakeRight.setPower(0);
-//                }
-//                break;
-//            case PickUpTransfer:
-//                moveIntakeWrist(0.7, SlowServoState.DEFAULT);
-//                if (gamepad1.right_bumper) {
-//                    intakeLeft.setPower(-1);
-//                    intakeRight.setPower(-1);
-//                } else {
-//                    intakeLeft.setPower(0);
-//                    intakeRight.setPower(0);
-//                }
-//                break;
+        switch (currentState) {
+            case Idle:
+                // Not implemented
+                break;
+            case PickUpInitial:
+                moveIntakeWrist(0.03, SlowServoState.SLOW_MOVING);
+                if (gamepad1.left_bumper) {
+                    intakeLeft.setPower(1);
+                    intakeRight.setPower(1);
+                } else {
+                    intakeLeft.setPower(0);
+                    intakeRight.setPower(0);
+                }
+                break;
+            case PickUpTransfer:
+                moveIntakeWrist(0.7, SlowServoState.DEFAULT);
+                if (gamepad1.right_bumper) {
+                    intakeLeft.setPower(-1);
+                    intakeRight.setPower(-1);
+                } else {
+                    intakeLeft.setPower(0);
+                    intakeRight.setPower(0);
+                }
+                break;
 //            case ScoreL1:
 //                lift.setTargetPosition(719);
 //                pivot.setTargetPosition(-45);
@@ -221,14 +221,14 @@ public class hello2 extends LinearOpMode {
 //                outtakeRight.setPosition(0.05);
 //                outtakeLeft.setPosition(0.05);
 //                break;
-//            }
+            }
 //
 //            if (gamepad1.right_bumper) {
 //                currentState = robotState.PickUpTransfer;
 //            } else if (gamepad1.left_bumper) {
 //                currentState = robotState.PickUpInitial;
 //            }
-//        }
+    }
     private void moveIntakeWrist(double position, SlowServoState mode) {
         intakeWristTarget = position;
         if (mode == SlowServoState.DEFAULT) {
@@ -246,13 +246,11 @@ public class hello2 extends LinearOpMode {
 //        }
 //    }
     private void slowServoLoop() {
-        telemetry.addData("test", intakeWristState.toString());
         if (intakeWristTarget + 0.01 >= intakewrist.getPosition() && intakeWristTarget - 0.01 <= intakewrist.getPosition()) {
             intakeWristState = SlowServoState.SLOW_DONE;
         }
         else if (intakeWristState == SlowServoState.SLOW_MOVING) {
             intakewrist.setPosition(intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 200));
-            telemetry.addData("uhhhh", intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 200));
         }
 //
 //        if (outtakeWristTarget + 0.01 >= outtakeWrist.getPosition() && outtakeWristTarget - 0.01 <= outtakeWrist.getPosition()) {
