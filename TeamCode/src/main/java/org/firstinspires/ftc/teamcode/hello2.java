@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp (name = "NewCompCode" ,group = "Linear Opmode")
+@TeleOp (name = "NewCompCode" ,group = "A")
 
 //@Disabled
 public class hello2 extends LinearOpMode {

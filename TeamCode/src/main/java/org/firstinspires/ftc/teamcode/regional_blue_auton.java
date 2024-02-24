@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name="REGIONAL BlUE AUTON", group="Robot")
+@Autonomous(name="REGIONAL BlUE AUTON", group="A")
 public class regional_blue_auton extends LinearOpMode {
     private DcMotorEx frontLeftDrive = null;
     private DcMotorEx frontRightDrive = null;
