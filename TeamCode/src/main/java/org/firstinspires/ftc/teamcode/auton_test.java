@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 
 
+@Disabled
 @Autonomous (name="RedAuton", group="Robot")
 public class auton_test extends LinearOpMode {
     public static double ORBITAL_FREQUENCY = 0.05;

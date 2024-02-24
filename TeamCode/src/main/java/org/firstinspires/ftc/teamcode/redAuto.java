@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 
 
+@Disabled
 @Autonomous (name="Comp Red Auton", group="Robot")
 public class redAuto extends LinearOpMode {
     public static double ORBITAL_FREQUENCY = 0.05;

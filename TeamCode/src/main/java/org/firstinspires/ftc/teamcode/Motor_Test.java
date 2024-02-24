@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp (name = "TEST_MotorEncoders" ,group = "Test")
 
-@Disabled
 public class Motor_Test extends LinearOpMode {
     //Motor demo variables
     private DcMotorEx frontLeftDrive = null;
