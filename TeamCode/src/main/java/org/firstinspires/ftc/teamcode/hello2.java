@@ -179,7 +179,12 @@ public class hello2 extends LinearOpMode {
                 sleep(500);
             }
         } else if (gamepad2.x) {
-            currentState = robotState.ScoreL3;
+            if (currentState == robotState.ScoreL3) {
+                currentState = robotState.ScoreOuttake;
+            } else {
+                currentState = robotState.ScoreL3;
+                sleep(500);
+            }
         } else if (gamepad2.y) {
             currentState = robotState.ScoreL4;
         } else if (gamepad2.back) {
