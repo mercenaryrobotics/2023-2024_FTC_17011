@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Autonomous(name="REGIONAL BlUE AUTON", group="A")
-public class regional_blue_auton extends LinearOpMode {
+@Autonomous(name="REGIONAL RED AUTON", group="A")
+public class regional_red_auton extends LinearOpMode {
     private DcMotorEx frontLeftDrive = null;
     private DcMotorEx frontRightDrive = null;
     private DcMotorEx backLeftDrive = null;
@@ -139,9 +139,9 @@ public class regional_blue_auton extends LinearOpMode {
     private void notStarted() {
         while (!isStarted()) {
 
-            if (AutonIPCVariables.ballX > -280 && AutonIPCVariables.ballX < -32) {
+            if (AutonIPCVariables.ballX > -134 && AutonIPCVariables.ballX < 100) {
                 aprilTagValue = 2;
-            } else if (AutonIPCVariables.ballX < 138 && AutonIPCVariables.ballX > 100) {
+            } else if (AutonIPCVariables.ballX < 290 && AutonIPCVariables.ballX > 270) {
                 aprilTagValue = 3;
             } else {
                 aprilTagValue = 1;
@@ -150,53 +150,27 @@ public class regional_blue_auton extends LinearOpMode {
             telemetry.addData("aprilTag value", aprilTagValue);
             telemetry.update();
 
+
         }
     }
     private void station() {
 
-        if (aprilTagValue==(3)){
-            intakewrist.setPosition(0.03);
-            sleep(500);
-            drive(750,750,750,750,0.3);
-            sleep(500);
-            intakeLeft.setPower(-1);
-            intakeRight.setPower(-1);
-//            intakewrist.setPosition(0.03);
-//            sleep(500);
-//            drive(600,600,600,600,0.4);
-//            drive(-100,100,100,-100,0.3);
-//            sleep(500);
-//            drive(-300,-300,-300,-300,0.3);
-//            intakeLeft.setPower(-1);
-//            intakeRight.setPower(-1);
-        }
-        else if (aprilTagValue==(2)) {
-            intakewrist.setPosition(0.03);
-            sleep(500);
-            drive(650,650,650,650,0.4);
-            sleep(500);
-            intakeLeft.setPower(-1);
-            intakeRight.setPower(-1);
+        intakewrist.setPosition(0.05);
+        drive(650,650,650,650,0.7);
+        sleep(500);
+        intakeLeft.setPower(-1);
+        intakeRight.setPower(-1);
 
-        }
-        else if (aprilTagValue==(1)){
-            intakewrist.setPosition(0.03);
-            sleep(500);
-            drive(650,650,650,650,0.4);
-            sleep(500);
-            intakeLeft.setPower(-1);
-            intakeRight.setPower(-1);
-//            intakewrist.setPosition(0.03);
-//            sleep(500);
-//            drive(650,650,650,650,0.2);
-//            sleep(500);
-//            drive(50,-50,50,-50,0.2);
-//            sleep(500);
-//            drive(-500,500,-500,500,0.2);
-//            drive(-200,-200,-200,-200,0.2);
-//            intakeLeft.setPower(-1);
-//            intakeRight.setPower(-1);
-        }
+//        if (aprilTagValue==(3)){
+//
+//        }
+//        else if (aprilTagValue==(2)) {
+//
+//
+//        }
+//        else if (aprilTagValue==(1)){
+//
+//        }
     }
     @Override
     public void runOpMode() {
@@ -207,7 +181,6 @@ public class regional_blue_auton extends LinearOpMode {
 
         while (!opModeIsActive()) {
             notStarted();
-
         } while (opModeIsActive()) {
             switch (currentState) {
                 case PRE_INIT:
@@ -258,7 +231,7 @@ public class regional_blue_auton extends LinearOpMode {
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        webcam.setPipeline(new BlueRegionalPipeline());
+        webcam.setPipeline(new RedRegionalPipeline());
         /*
          * Open the connection to the camera device. New in v1.4.0 is the ability
          * to open the camera asynchronously, and this is now the recommended way
@@ -306,7 +279,7 @@ public class regional_blue_auton extends LinearOpMode {
 }
 
 
-class BlueRegionalPipeline extends OpenCvPipeline {
+class RedRegionalPipeline extends OpenCvPipeline {
 
     /*
      * NOTE: if you wish to use additional Mat objects in your processing pipeline, it is
@@ -329,7 +302,7 @@ class BlueRegionalPipeline extends OpenCvPipeline {
 
         for (int i = 0; i < contours.size(); i++) {// iterate through each contour.
             double area = Imgproc.contourArea(contours.get(i),false); // Find the area of contour
-            if ((area > largest_area) && (area > BlueAutonConstants.minBallArea)) {
+            if ((area > largest_area) && (area > RedAutonConstants.minBallArea)) {
                 largest_area=area;
                 largest_contour_index=i; // Store the index of largest contour
             }
@@ -349,7 +322,7 @@ class BlueRegionalPipeline extends OpenCvPipeline {
 
         for (int i = 0; i < contours.size(); i++) {// iterate through each contour.
             double area = Imgproc.contourArea(contours.get(i),false); // Find the area of contour
-            if ((area > largest_area) && (area > BlueAutonConstants.minBallArea)) {
+            if ((area > largest_area) && (area > RedAutonConstants.minBallArea)) {
                 largest_area=area;
             }
         }
@@ -432,8 +405,8 @@ class BlueRegionalPipeline extends OpenCvPipeline {
 
         //Filter pixels outside the desired color range
 
-        Scalar color_lower = new Scalar(BlueAutonConstants.color_lower_h, BlueAutonConstants.color_lower_s, BlueAutonConstants.color_lower_v);
-        Scalar color_upper = new Scalar(BlueAutonConstants.color_upper_h, BlueAutonConstants.color_upper_s, BlueAutonConstants.color_upper_v);
+        Scalar color_lower = new Scalar(RedAutonConstants.color_lower_h, RedAutonConstants.color_lower_s, RedAutonConstants.color_lower_v);
+        Scalar color_upper = new Scalar(RedAutonConstants.color_upper_h, RedAutonConstants.color_upper_s, RedAutonConstants.color_upper_v);
         Core.inRange(input, color_lower, color_upper, input);
 
 
@@ -441,11 +414,11 @@ class BlueRegionalPipeline extends OpenCvPipeline {
 
 
         //De-speckle the image
-        Mat element = Imgproc.getStructuringElement(BlueAutonConstants.elementType,
-                new Size(2 * BlueAutonConstants.kernelSize + 1,
-                        2 * BlueAutonConstants.kernelSize + 1),
-                new Point(BlueAutonConstants.kernelSize,
-                        BlueAutonConstants.kernelSize));
+        Mat element = Imgproc.getStructuringElement(RedAutonConstants.elementType,
+                new Size(2 * RedAutonConstants.kernelSize + 1,
+                        2 * RedAutonConstants.kernelSize + 1),
+                new Point(RedAutonConstants.kernelSize,
+                        RedAutonConstants.kernelSize));
         Imgproc.erode(input, input, element);
         Imgproc.erode(input, TestImage, element);
 
@@ -455,7 +428,7 @@ class BlueRegionalPipeline extends OpenCvPipeline {
         Imgproc.findContours(input, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Filter out blobs larger than maxBallArea
-        contours.removeIf(c -> (Imgproc.contourArea(c) > BlueAutonConstants.maxBallArea));
+        contours.removeIf(c -> (Imgproc.contourArea(c) > RedAutonConstants.maxBallArea));
 
         // Get largest contour (hopefully ball)
         int largest_contour_index = getLargestContourIndex(contours);
@@ -476,10 +449,10 @@ class BlueRegionalPipeline extends OpenCvPipeline {
                 color = new Scalar(255, 0, 0);
             }
 
-            if (BlueAutonConstants.drawContours) {
+            if (RedAutonConstants.drawContours) {
                 Imgproc.drawContours(DisplayImage, contoursPolyList, i, color);
             }
-            if (BlueAutonConstants.drawCircle) {
+            if (RedAutonConstants.drawCircle) {
                 Imgproc.circle(DisplayImage, centers[i], (int) radii[i][0], color, 2);
             }
         }

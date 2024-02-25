@@ -12,7 +12,7 @@ public class RedAutonConstants {
     public static int color_lower_v = 100;
     public static int color_upper_v = 255;
 
-    public static int minBallArea = 40;
+    public static int minBallArea = 2000;
     public static int maxBallArea = 40000;
 
     public static int elementType = 0;

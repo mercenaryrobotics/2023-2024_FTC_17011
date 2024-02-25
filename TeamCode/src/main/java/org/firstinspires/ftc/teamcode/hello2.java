@@ -137,7 +137,7 @@ public class hello2 extends LinearOpMode {
         lift.setTargetPosition(0);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(0.8);
-        lift.setTargetPosition(20);
+        lift.setTargetPosition(0);
 
         // Pivot
         pivot = hardwareMap.get(DcMotorEx.class, "pivot");
@@ -192,10 +192,10 @@ public class hello2 extends LinearOpMode {
             currentState = robotState.ScoreL4;
         } else if (gamepad2.back) {
             currentState = robotState.Idle;
-            moveIntakeWrist(0.05, SlowServoState.SLOW_MOVING);
+            moveIntakeWrist(0.03, SlowServoState.SLOW_MOVING);
             outtakeRight.setPosition(0);
             outtakeLeft.setPosition(0);
-            lift.setTargetPosition(20);
+            lift.setTargetPosition(0);
             pivot.setTargetPosition(0);
             moveOuttakeWrist(0, SlowServoState.SLOW_MOVING);
         }
@@ -214,7 +214,7 @@ public class hello2 extends LinearOpMode {
                 }
                 break;
             case PickUpTransfer:
-                moveIntakeWrist(0.68, SlowServoState.DEFAULT);
+                moveIntakeWrist(0.67, SlowServoState.DEFAULT);
                 break;
             case ScoreL1:
                 lift.setTargetPosition(719);
@@ -228,9 +228,9 @@ public class hello2 extends LinearOpMode {
                 // moveOuttakeWrist(gamepad2.right_trigger, SlowServoState.DEFAULT);
                 break;
             case ScoreL3:
-                lift.setTargetPosition(729);
-                pivot.setTargetPosition(106);
-                moveOuttakeWrist(0.44, SlowServoState.DEFAULT);
+                lift.setTargetPosition(749);
+                pivot.setTargetPosition(166);
+                moveOuttakeWrist(0.43, SlowServoState.DEFAULT);
                 // moveOuttakeWrist(gamepad2.right_trigger, SlowServoState.DEFAULT);
                 break;
             case ScoreL4:
@@ -241,7 +241,7 @@ public class hello2 extends LinearOpMode {
                 break;
             }
 
-        if (intakewrist.getPosition() > 0.67) {
+        if (intakewrist.getPosition() > 0.65) {
             if (gamepad2.right_trigger > 0.5) {
                 intakeLeft.setPower(-1);
                 intakeRight.setPower(-1);
@@ -259,7 +259,7 @@ public class hello2 extends LinearOpMode {
             intakeRight.setPower(0);
         }
 
-        if (gamepad2.left_bumper) {
+        if (gamepad2.left_trigger > 0.9) {
             shooter.setPosition(0.5);
         }
     }
@@ -284,7 +284,7 @@ public class hello2 extends LinearOpMode {
             intakeWristState = SlowServoState.SLOW_DONE;
         }
         else if (intakeWristState == SlowServoState.SLOW_MOVING) {
-            intakewrist.setPosition(intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 50));
+            intakewrist.setPosition(intakewrist.getPosition() + ((intakeWristTarget - intakewrist.getPosition()) / 40));
         }
 
         if (outtakeWristTarget + 0.01 >= outtakeWrist.getPosition() && outtakeWristTarget - 0.01 <= outtakeWrist.getPosition()) {
